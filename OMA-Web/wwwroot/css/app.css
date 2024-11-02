@@ -156,3 +156,20 @@ code {
     margin: 0 auto;
     width: 30rem;
 }
+
+
+/* Home Page */
+
+.card {
+    border:solid black 1.5px;
+}
+.card-title {
+    border-bottom: solid black 2px;
+    justify-items:center;
+    margin:0;
+    padding-top:0.5rem;
+}
+
+.card-body {
+    background: #92e8b2;
+}
