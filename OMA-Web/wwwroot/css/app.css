@@ -101,3 +101,58 @@ a, .btn-link {
 code {
     color: #c02d76;
 }
+
+.break-line {
+    border: solid black 2px;
+}
+
+.navbar {
+    background-color: rgb(212 232 210) !important;
+}
+
+.navbar-brand {
+    color: black !important;
+}
+
+.nav-scrollable {
+    background: rgb(152,208,120);
+    background: linear-gradient(0deg, rgba(152,208,120,1) 0%, rgba(213,232,211,1) 100%);
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+    .nav-scrollable .flex-column {
+        display: flex !important;
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        height: 100% !important;
+    }
+    .nav-scrollable .flex-column .last-child {
+        margin-top: auto !important;
+    }
+
+.nav-link {
+    color: black !important;
+    border: solid black 2px;
+    border-radius: 10px !important;
+    font-size: large;
+    font-weight: 600;
+    background: white !important;
+}
+.nav-link:hover {
+    border:solid black 3px;
+}
+
+.nav-item {
+    margin-bottom: 1rem;
+}
+
+.top-row {
+    height: 3.28rem !important;
+}
+
+.searchbar {
+    margin: 0 auto;
+    width: 30rem;
+}
