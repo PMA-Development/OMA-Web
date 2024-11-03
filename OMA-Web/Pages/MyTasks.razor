@@ -1,0 +1,83 @@
+﻿@page "/mytasks"
+
+<div class="mb-5">
+    <input placeholder="Search..." class="form-control searchbar" />
+</div>
+
+
+<div class="mytasks col-12 flex-column ">
+    <div class="col-12 flex-row d-flex justify-content-between">
+        @for (int i = 1; i < 5; i++)
+        {
+            <div class="card me-5 mb-5" @onclick="async () => {await ShowTasks(i);}">
+                <div class="card-title">
+                    <h5>Replacement of sensor</h5>
+                </div>
+                <div class="card-body">
+                    <h5><b>Type:</b> Vedlighedhodelse</h5>
+                    <h5><b>Level:</b> 1</h5>
+                    <h5><b>Description:</b> bla bla bla</h5>
+                    <h5>Nordsø 1 - A1</h5>
+                    <div class="d-flex justify-content-evenly mt-3">
+                        <input type="button" value="View" />
+                        <input type="button" value="Eskalate" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="col-12 flex-row d-flex justify-content-between">
+        @for (int i = 1; i < 5; i++)
+        {
+            <div class="card me-5 mb-5" @onclick="async () => {await ShowTasks(i);}">
+                <div class="card-title">
+                    <h5>Replacement of sensor</h5>
+                </div>
+                <div class="card-body">
+                    <h5><b>Type:</b> Vedlighedhodelse</h5>
+                    <h5><b>Level:</b> 1</h5>
+                    <h5><b>Description:</b> bla bla bla</h5>
+                    <h5>Nordsø 1 - A1</h5>
+                    <div class="d-flex justify-content-evenly mt-3">
+                        <input type="button" value="View" />
+                        <input type="button" value="Eskalate" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="col-12 flex-row d-flex justify-content-between">
+        @for (int i = 1; i < 5; i++)
+        {
+            <div class="card me-5 mb-5" @onclick="async () => {await ShowTasks(i);}">
+                <div class="card-title">
+                    <h5>Replacement of sensor</h5>
+                </div>
+                <div class="card-body">
+                    <h5><b>Type:</b> Vedlighedhodelse</h5>
+                    <h5><b>Level:</b> 1</h5>
+                    <h5><b>Description:</b> bla bla bla</h5>
+                    <h5>Nordsø 1 - A1</h5>
+                    <div class="d-flex justify-content-evenly mt-3">
+                        <input type="button" value="View" />
+                        <input type="button" value="Eskalate" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<Modal @ref="modal" />
+
+@code {
+    private BlazorBootstrap.Modal modal = default!;
+
+
+    private async Task ShowTasks(int id)
+    {
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("TaskID", id);
+        await modal.ShowAsync<WindmillsModal>(title: "Task detail", parameters: parameters);
+    }
+}
