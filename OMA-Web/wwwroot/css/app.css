@@ -134,11 +134,12 @@ code {
 
 .nav-link {
     color: black !important;
-    border: solid black 2px;
+    border: solid black 2px !important;
     border-radius: 10px !important;
-    font-size: large;
-    font-weight: 600;
+    font-size: large !important; 
+    font-weight: 600 !important;
     background: white !important;
+    padding-left:1rem !important;
 }
 .nav-link:hover {
     border:solid black 3px;
@@ -153,8 +154,8 @@ code {
 }
 
 .searchbar {
-    margin: 0 auto;
-    width: 30rem;
+    margin: 0 auto !important;
+    width: 30rem !important;
 }
 
 
@@ -167,7 +168,7 @@ code {
 .card-title {
     border-bottom: solid black 2px;
     justify-items: center;
-    margin: 0;
+    margin: 0 !important;
     padding-top: 0.5rem;
 }
 
@@ -191,4 +192,10 @@ code {
 .windmills .card {
     width: inherit;
     height: fit-content;
+}
+
+/* Tasks */
+
+.tasks .card {
+    cursor: unset !important;
 }
