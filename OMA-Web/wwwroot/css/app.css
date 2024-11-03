@@ -158,18 +158,37 @@ code {
 }
 
 
-/* Home Page */
 
 .card {
-    border:solid black 1.5px;
-}
-.card-title {
-    border-bottom: solid black 2px;
-    justify-items:center;
-    margin:0;
-    padding-top:0.5rem;
+    border: solid black 1.5px;
+    cursor: pointer;
 }
 
-.card-body {
+.card-title {
+    border-bottom: solid black 2px;
+    justify-items: center;
+    margin: 0;
+    padding-top: 0.5rem;
+}
+
+.card-body.error {
+    background: #fb4848;
+}
+
+.card-body.success {
     background: #92e8b2;
+}
+
+
+/* Home Page */
+
+
+/* Windmills */
+.return-btn {
+    border:none;
+}
+
+.windmills .card {
+    width: inherit;
+    height: fit-content;
 }

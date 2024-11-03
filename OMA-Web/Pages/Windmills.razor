@@ -1,0 +1,90 @@
+﻿@page "/windmills/{id:int}"
+
+<div>
+    <input placeholder="Search..." class="form-control searchbar" />
+</div>
+
+<div class="mb-2">
+    <button class="return-btn" onclick="history.back()">← Return</button>
+</div>
+
+<div class="windmills col-12 flex-column">
+    <!-- Row A -->
+    <div class="col-12 flex-row d-flex">
+        @for (int i = 1; i < 5; i++)
+        {
+            <div class="card me-5 mb-5">
+                <div class="card-title ">
+                    <h2>@("A" + i)</h2>
+                </div>
+                <div class="card-body success">
+                    <h5>Temperature: 24C</h5>
+                    <h5>Fugtoghed: 19%</h5>
+                    <h5>Acceleration: 25mps</h5>
+                    <h5>Vibrationer: 45hz</h5>
+                    <h5>Rotatiuoner: 25rpm</h5>
+                </div>
+            </div>
+        }
+    </div>
+    <!-- Row B -->
+    <div class="col-12 flex-row d-flex">
+        @for (int i = 1; i < 5; i++)
+        {
+            <div class="card me-5 mb-5">
+                <div class="card-title ">
+                    <h2>@("B" + i)</h2>
+                </div>
+                <div class="card-body success">
+                    <h5>Temperature: 24C</h5>
+                    <h5>Fugtoghed: 19%</h5>
+                    <h5>Acceleration: 25mps</h5>
+                    <h5>Vibrationer: 45hz</h5>
+                    <h5>Rotatiuoner: 25rpm</h5>
+                </div>
+            </div>
+        }
+    </div>
+    <!-- Row C -->
+    <div class="col-12 flex-row d-flex">
+        @for (int i = 1; i < 5; i++)
+        {
+            <div class="card me-5 mb-5">
+                <div class="card-title ">
+                    <h2>@("C" + i)</h2>
+                </div>
+                <div class="card-body success">
+                    <h5>Temperature: 24C</h5>
+                    <h5>Fugtoghed: 19%</h5>
+                    <h5>Acceleration: 25mps</h5>
+                    <h5>Vibrationer: 45hz</h5>
+                    <h5>Rotatiuoner: 25rpm</h5>
+                </div>
+            </div>
+        }
+    </div>
+    <!-- Row D -->
+    <div class="col-12 flex-row d-flex">
+        @for (int i = 1; i < 5; i++)
+        {
+            <div class="card me-5">
+                <div class="card-title ">
+                    <h2>@("D" + i)</h2>
+                </div>
+                <div class="card-body success">
+                    <h5>Temperature: 24C</h5>
+                    <h5>Fugtoghed: 19%</h5>
+                    <h5>Acceleration: 25mps</h5>
+                    <h5>Vibrationer: 45hz</h5>
+                    <h5>Rotatiuoner: 25rpm</h5>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int ID { get; set; }
+
+}

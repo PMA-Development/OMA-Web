@@ -1,20 +1,21 @@
 ﻿@page "/"
+@inject NavigationManager Navigation
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Windmills</PageTitle>
 
 <div>
     <input placeholder="Search..." class="form-control searchbar" />
 </div>
 
-<div class="col-12 d-flex flex-column mt-5">
+<div class="home col-12 d-flex flex-column mt-5">
     <div class="flex-row d-flex justify-content-evenly">
         <div class="col-4">
             <!-- First -->
-            <div class="card">
+            <div class="card" @onclick="() => {Redirect(1);}">
                 <div class="card-title ">
                     <h2>Nordsø 1</h2>
                 </div>
-                <div class="card-body">
+                <div class="card-body success">
                     <h5>High Priority</h5>
                     <p>Task 1</p>
                     <p>Task 2</p>
@@ -25,11 +26,11 @@
         </div>
         <div class="col-4">
             <!-- Two -->
-            <div class="card">
+            <div class="card" @onclick="() => {Redirect(2);}">
                 <div class="card-title">
                     <h2>Nordsø 2</h2>
                 </div>
-                <div class="card-body">
+                <div class="card-body success">
                     <h5>High Priority</h5>
                     <p>Task 1</p>
                     <p>Task 2</p>
@@ -43,11 +44,11 @@
     <div class="flex-row d-flex justify-content-evenly mt-5">
         <div class="col-4">
             <!-- Third -->
-            <div class="card">
+            <div class="card" @onclick="() => {Redirect(3);}">
                 <div class="card-title">
                     <h2>Nordsø 3</h2>
                 </div>
-                <div class="card-body">
+                <div class="card-body success">
                     <h5>High Priority</h5>
                     <p>Task 1</p>
                     <p>Task 2</p>
@@ -59,11 +60,11 @@
         <div class="col-4">
 
             <!-- Four -->
-            <div class="card">
+            <div class="card" @onclick="() => {Redirect(4);}">
                 <div class="card-title">
                     <h2>Nordsø 4</h2>
                 </div>
-                <div class="card-body">
+                <div class="card-body error">
                     <h5>High Priority</h5>
                     <p>Task 1</p>
                     <p>Task 2</p>
@@ -76,7 +77,12 @@
     </div>
 </div>
 
-
+@code {
+    public void Redirect(int id)
+    {
+        Navigation.NavigateTo("/windmills/" + id);
+    }
+}
 
 
 
