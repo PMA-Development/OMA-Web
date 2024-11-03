@@ -1,4 +1,5 @@
-﻿@page "/windmills/{id:int}"
+﻿@using Modal;
+@page "/windmills/{id:int}"
 
 <div>
     <input placeholder="Search..." class="form-control searchbar" />
@@ -13,7 +14,7 @@
     <div class="col-12 flex-row d-flex">
         @for (int i = 1; i < 5; i++)
         {
-            <div class="card me-5 mb-5">
+            <div class="card me-5 mb-5" @onclick="async () => {await ShowWindmill(i);}">
                 <div class="card-title ">
                     <h2>@("A" + i)</h2>
                 </div>
@@ -31,7 +32,7 @@
     <div class="col-12 flex-row d-flex">
         @for (int i = 1; i < 5; i++)
         {
-            <div class="card me-5 mb-5">
+            <div class="card me-5 mb-5" @onclick="async () => {await ShowWindmill(i);}">
                 <div class="card-title ">
                     <h2>@("B" + i)</h2>
                 </div>
@@ -49,7 +50,7 @@
     <div class="col-12 flex-row d-flex">
         @for (int i = 1; i < 5; i++)
         {
-            <div class="card me-5 mb-5">
+            <div class="card me-5 mb-5" @onclick="async () => {await ShowWindmill(i);}">
                 <div class="card-title ">
                     <h2>@("C" + i)</h2>
                 </div>
@@ -67,7 +68,7 @@
     <div class="col-12 flex-row d-flex">
         @for (int i = 1; i < 5; i++)
         {
-            <div class="card me-5">
+            <div class="card me-5" @onclick="async () => {await ShowWindmill(i);}">
                 <div class="card-title ">
                     <h2>@("D" + i)</h2>
                 </div>
@@ -83,8 +84,20 @@
     </div>
 </div>
 
+
+<Modal @ref="modal" />
+
 @code {
+    private BlazorBootstrap.Modal modal = default!;
+
     [Parameter]
     public int ID { get; set; }
 
+
+    private async Task ShowWindmill(int id)
+    {
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("WindmillID", id);
+        await modal.ShowAsync<WindmillsModal>(title: "Windmill detail", parameters: parameters);
+    }
 }
