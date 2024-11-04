@@ -187,6 +187,7 @@ code {
 /* Windmills */
 .return-btn {
     border:none;
+    background:white;
 }
 
 .windmills .card {

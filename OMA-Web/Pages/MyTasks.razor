@@ -78,6 +78,6 @@
     {
         var parameters = new Dictionary<string, object>();
         parameters.Add("TaskID", id);
-        await modal.ShowAsync<WindmillsModal>(title: "Task detail", parameters: parameters);
+        await modal.ShowAsync<MyTaskModal>(title: "Task detail", parameters: parameters);
     }
 }
