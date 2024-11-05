@@ -5,13 +5,13 @@
 @inject IAccessTokenProvider AccessTokenProvider
 @inject AuthenticationStateProvider AuthenticationStateProvider
 <PageTitle>Windmills</PageTitle>
-@* <AuthorizeView Roles="Hotline-User"> *@
+<AuthorizeView Roles="Hotline-User">
 <h3>Data Fetching</h3>
 
 <button @onclick="GetAccessToken">Get Access Token</button>
 
 <p>@accessToken</p>
-@* </AuthorizeView> *@
+</AuthorizeView>
 <div>
     <input placeholder="Search..." class="form-control searchbar" />
 </div>
@@ -88,6 +88,8 @@
 
 @code {
 
+    //TODO: DEbug code for token
+    #region debug token code
     private ClaimsPrincipal user;
 
     protected override async Task OnInitializedAsync()
@@ -117,6 +119,8 @@
             accessToken = "No access token available.";
         }
     }
+    
+    #endregion
 
     public void Redirect(int id)
     {
