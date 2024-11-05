@@ -1,8 +1,17 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using System.Security.Claims
 @inject NavigationManager Navigation
-
+@inject IAccessTokenProvider AccessTokenProvider
+@inject AuthenticationStateProvider AuthenticationStateProvider
 <PageTitle>Windmills</PageTitle>
+@* <AuthorizeView Roles="Hotline-User"> *@
+<h3>Data Fetching</h3>
 
+<button @onclick="GetAccessToken">Get Access Token</button>
+
+<p>@accessToken</p>
+@* </AuthorizeView> *@
 <div>
     <input placeholder="Search..." class="form-control searchbar" />
 </div>
@@ -78,6 +87,37 @@
 </div>
 
 @code {
+
+    private ClaimsPrincipal user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var isAdmin = user.IsInRole("Hotline-User"); // Check for a specific role
+                                                  // Perform actions based on role
+        }
+    }
+
+    private string accessToken;
+
+    private async Task GetAccessToken()
+    {
+        var result = await AccessTokenProvider.RequestAccessToken();
+
+        if (result.TryGetToken(out var token))
+        {
+            accessToken = token.Value; // This is the access token
+        }
+        else
+        {
+            accessToken = "No access token available.";
+        }
+    }
+
     public void Redirect(int id)
     {
         Navigation.NavigateTo("/windmills/" + id);
