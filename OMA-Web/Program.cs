@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Radzen;
 
 namespace OMA_Web
 {
@@ -13,6 +14,8 @@ namespace OMA_Web
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             builder.Services.AddBlazorBootstrap();
+            builder.Services.AddRadzenComponents();
+
             await builder.Build().RunAsync();
         }
     }

@@ -1,7 +1,32 @@
 ﻿@page "/logging"
 
-<p>Add radzen virtulization</p>
+<RadzenStack Gap="1rem">
+    <RadzenDataGrid Data="@logDetails" FilterMode="FilterMode.Simple" AllowVirtualization="true" Style="height:90vh"
+                    AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.Or"
+                    AllowSorting="true">
+        <Columns>
+            <RadzenDataGridColumn Property="@nameof(LogDTO.LogID)" Title="ID" />
+            <RadzenDataGridColumn Property="@nameof(LogDTO.Description)" Title="Description" />
+            <RadzenDataGridColumn Property="@nameof(LogDTO.Severity)" Title="Severity" />
+            <RadzenDataGridColumn Property="@nameof(LogDTO.UserID)" Title="UserID" />
+            <RadzenDataGridColumn Property="@nameof(LogDTO.Time)" Title="Time" />
+        </Columns>
+    </RadzenDataGrid>
+</RadzenStack>
 
 @code {
-   
+    IEnumerable<LogDTO> logDetails = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        List<LogDTO> temp = [];
+        for (int i = 0; i < 100; i++)
+        {
+            temp.Add(new LogDTO { LogID = i, Time = DateTime.Now, Description = "bla bla", Severity = "High", UserID = i });
+        }
+
+        logDetails = temp;
+    }
 }
