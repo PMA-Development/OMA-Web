@@ -13,33 +13,20 @@ namespace OMA_Web
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");
             //TODO: Clean up code
-            //builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
+           
             // Debugging: Check if appsettings.json values are loaded
-            var oidcSettings = builder.Configuration.GetSection("OidcSettings");
-            if (oidcSettings == null)
-            {
-                throw new Exception("OidcSettings section is missing in the configuration.");
-            }
+           
+            //if (oidcSettings == null)
+            //{
+            //    throw new Exception("OidcSettings section is missing in the configuration.");
+            //}
 
-            Console.WriteLine($"Authority: {oidcSettings["Authority"]}");
-            Console.WriteLine($"ClientId: {oidcSettings["ClientId"]}");
+            //Console.WriteLine($"Authority: {oidcSettings["Authority"]}");
+            //Console.WriteLine($"ClientId: {oidcSettings["ClientId"]}");
 
             builder.Services.AddOidcAuthentication(options =>
             {
-                //TODO: Fix issue with hardcoded values
-                //options.ProviderOptions.Authority = "https://localhost:5000";
-                //options.ProviderOptions.ClientId = "OMA-Web";
-                //options.ProviderOptions.ResponseType = "code";
-                //options.ProviderOptions.RedirectUri = "https://localhost:7123/authentication/login-callback";
-                //options.ProviderOptions.PostLogoutRedirectUri = "https://localhost:7123/authentication/logout-callback";
-
-                //// Adding hardcoded scopes
-                //var scopes = new string[] { "openid", "profile", "email", "role" };
-                //foreach (var scope in scopes)
-                //{
-                //    options.ProviderOptions.DefaultScopes.Add(scope);
-                //}
+                var oidcSettings = builder.Configuration.GetSection("OidcSettings");
                 options.ProviderOptions.Authority = oidcSettings["Authority"];
                 options.ProviderOptions.ClientId = oidcSettings["ClientId"];
                 options.ProviderOptions.ResponseType = oidcSettings["ResponseType"];
