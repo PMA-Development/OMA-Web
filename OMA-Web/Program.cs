@@ -12,17 +12,7 @@ namespace OMA_Web
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");
-            //TODO: Clean up code
-           
-            // Debugging: Check if appsettings.json values are loaded
-           
-            //if (oidcSettings == null)
-            //{
-            //    throw new Exception("OidcSettings section is missing in the configuration.");
-            //}
 
-            //Console.WriteLine($"Authority: {oidcSettings["Authority"]}");
-            //Console.WriteLine($"ClientId: {oidcSettings["ClientId"]}");
 
             builder.Services.AddOidcAuthentication(options =>
             {
