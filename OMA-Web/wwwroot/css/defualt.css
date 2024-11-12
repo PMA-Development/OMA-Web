@@ -1,4 +1,4 @@
-html, body {
+﻿html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
@@ -17,7 +17,7 @@ a, .btn-link {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .content {
@@ -128,24 +128,26 @@ code {
         margin: 0 !important;
         height: 100% !important;
     }
-    .nav-scrollable .flex-column .last-child {
-        margin-top: auto !important;
-    }
 
-.nav-link {
+        .nav-scrollable .flex-column .last-child {
+            margin-top: auto !important;
+        }
+
+.sidebarNav .sidebar-link {
     color: black !important;
     border: solid black 2px !important;
     border-radius: 10px !important;
-    font-size: large !important; 
+    font-size: large !important;
     font-weight: 600 !important;
     background: white !important;
-    padding-left:1rem !important;
-}
-.nav-link:hover {
-    border:solid black 3px;
+    padding-left: 1rem !important;
 }
 
-.nav-item {
+    .sidebarNav .sidebar-link:hover {
+        border: solid black 3px;
+    }
+
+.sidebarNav .nav-item {
     margin-bottom: 1rem;
 }
 
@@ -186,8 +188,8 @@ code {
 
 /* Windmills */
 .return-btn {
-    border:none;
-    background:white;
+    border: none;
+    background: white;
 }
 
 .windmills .card {
@@ -199,4 +201,14 @@ code {
 
 .tasks .card {
     cursor: unset !important;
+}
+
+
+/* Admin page */
+
+.adminPage .nav-link {
+    color:gray!important;
+}
+.adminPage .nav-link.active {
+    color:black!important;
 }

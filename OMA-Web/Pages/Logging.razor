@@ -1,7 +1,7 @@
 ﻿@page "/logging"
 
-<RadzenStack Gap="1rem">
-    <RadzenDataGrid Data="@logDetails" FilterMode="FilterMode.Simple" AllowVirtualization="true" Style="height:90vh"
+<RadzenStack Gap="1rem" >
+    <RadzenDataGrid AllowRowSelectOnRowClick="true" Data="@logs" FilterMode="FilterMode.Simple" AllowVirtualization="true" Style="height:90vh"
                     AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.Or"
                     AllowSorting="true">
         <Columns>
@@ -14,19 +14,19 @@
     </RadzenDataGrid>
 </RadzenStack>
 
-@code {
-    IEnumerable<LogDTO> logDetails = [];
 
-    protected override async Task OnInitializedAsync()
+@code {   
+    IEnumerable<LogDTO> logs;
+
+  
+    protected override void OnInitialized()
     {
-        await base.OnInitializedAsync();
-
         List<LogDTO> temp = [];
-        for (int i = 0; i < 100; i++)
+        for (int i = 1; i < 100; i++)
         {
-            temp.Add(new LogDTO { LogID = i, Time = DateTime.Now, Description = "bla bla", Severity = "High", UserID = i });
+            temp.Add(new LogDTO { LogID = i, Description = "bla bla bla", Severity = "High", Time = DateTime.Parse("11/11/2024 10:45"), User = new User { UserID = i, FullName = "James james", Email ="James@email.com", Phone = "33 91 02 11" } });
         }
 
-        logDetails = temp;
+        logs = temp;
     }
 }

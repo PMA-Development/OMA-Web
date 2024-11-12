@@ -1,0 +1,147 @@
+﻿@page "/admin/islands/"
+@inject OMAClient client
+
+<RadzenDataGrid @ref="islandGrid" AllowAlternatingRows="false" EditMode="@editMode"
+                Data="@islands" TItem="IslandDTO" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px"
+                FilterMode="FilterMode.Simple" AllowVirtualization="true" Style="height:90vh"
+                AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.Or"
+                AllowSorting="true">
+    <Columns>
+        <RadzenDataGridColumn Property="@nameof(IslandDTO.IslandID)" Title="Island ID" Width="120px" Frozen="true" />
+        <RadzenDataGridColumn Property="@nameof(IslandDTO.Title)" Title="Title">
+            <EditTemplate Context="island">
+                <RadzenTextBox @bind-Value="island.Title" Style="width:200px; display: block" Name="Title" aria-label="Enter Title" />
+                <RadzenRequiredValidator Text="Title is required" Component="Title" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(IslandDTO.Abbreviation)" Title="Abbreviation">
+            <EditTemplate Context="island">
+                <RadzenTextBox @bind-Value="island.Abbreviation" Style="width:200px; display: block" Name="Abbreviation" aria-label="Enter Abbreviation" />
+                <RadzenRequiredValidator Text="Abbreviation is required" Component="Abbreviation" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="island" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
+            <Template Context="island">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" Click="@(args => EditRow(island))" @onclick:stopPropagation="true">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="Radzen.ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(args => DeleteRow(island))" @onclick:stopPropagation="true">
+                </RadzenButton>
+            </Template>
+            <EditTemplate Context="island">
+                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" Click="@((args) => SaveRow(island))" aria-label="Save">
+                </RadzenButton>
+                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@((args) => CancelEdit(island))" aria-label="Cancel">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="Radzen.ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(args => DeleteRow(island))" aria-label="Delete">
+                </RadzenButton>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+
+    RadzenDataGrid<IslandDTO> islandGrid;
+    IEnumerable<IslandDTO> islands;
+
+    DataGridEditMode editMode = DataGridEditMode.Single;
+
+    List<IslandDTO> islandsToInsert = [];
+    List<IslandDTO> islandsToUpdate = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        // users = await client.GetUsersAsync();
+        var islandlist = new List<IslandDTO>();
+        islandlist.Add(new IslandDTO {IslandID = 1, Title = "Nordsø - 1", Abbreviation = "NS-1"});
+        islands = islandlist;
+    }
+
+    void Reset()
+    {
+        islandsToInsert.Clear();
+        islandsToUpdate.Clear();
+    }
+
+    void Reset(IslandDTO island)
+    {
+        islandsToInsert.Remove(island);
+        islandsToUpdate.Remove(island);
+    }
+
+    async Task EditRow(IslandDTO island)
+    {
+        if (editMode == DataGridEditMode.Single && islandsToInsert.Count() > 0)
+        {
+            Reset();
+        }
+
+        islandsToUpdate.Add(island);
+        await islandGrid.EditRow(island);
+    }
+
+    void OnUpdateRow(IslandDTO island)
+    {
+        Reset(island);
+
+        // dbContext.Update(log);
+
+        // dbContext.SaveChanges();
+    }
+
+    async Task SaveRow(IslandDTO island)
+    {
+        await islandGrid.UpdateRow(island);
+    }
+
+    void CancelEdit(IslandDTO island)
+    {
+        Reset(island);
+
+        islandGrid.CancelEditRow(island);
+
+        // var orderEntry = dbContext.Entry(log);
+        // if (orderEntry.State == EntityState.Modified)
+        // {
+        //     orderEntry.CurrentValues.SetValues(orderEntry.OriginalValues);
+        //     orderEntry.State = EntityState.Unchanged;
+        // }
+    }
+
+    async Task DeleteRow(IslandDTO island)
+    {
+        Reset(island);
+
+        if (islands.Contains(island))
+        {
+            // dbContext.Remove<Log>(log);
+
+            // dbContext.SaveChanges();
+
+            await islandGrid.Reload();
+        }
+        else
+        {
+            islandGrid.CancelEditRow(island);
+            await islandGrid.Reload();
+        }
+    }
+
+    async Task InsertRow()
+    {
+        if (editMode == DataGridEditMode.Single)
+        {
+            Reset();
+        }
+
+        var island = new IslandDTO();
+        islandsToInsert.Add(island);
+        await islandGrid.InsertRow(island);
+    }
+
+    public async Task OnCreateRow(IslandDTO island)
+    {
+        // var id = await client.AddUserAsync(island);
+        islandsToInsert.Remove(island);
+    }
+}

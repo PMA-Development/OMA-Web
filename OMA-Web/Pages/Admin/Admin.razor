@@ -1,0 +1,70 @@
+﻿@page "/admin/"
+
+<div class="adminPage">
+    <ul class="nav nav-tabs ">
+        <li class="nav-item">
+            <input type="button" class="nav-link @(GetActiveStyle(1))" value="Users" @onclick="() => {ToggleDisplay(1);}" />
+        </li>
+        <li class="nav-item">
+            <input type="button" class="nav-link @(GetActiveStyle(2))" value="Alarms" @onclick="() => {ToggleDisplay(2);}" />
+        </li>
+        <li class="nav-item">
+            <input type="button" class="nav-link @(GetActiveStyle(3))" value="Islands" @onclick="() => {ToggleDisplay(3);}" />
+        </li>
+        <li class="nav-item">
+            <input type="button" class="nav-link @(GetActiveStyle(4))" value="Turbines" @onclick="() => {ToggleDisplay(4);}" />
+        </li>
+    </ul>
+</div>
+
+<div style="display: @(GetDisplayStyle(1))">
+    <UserAdministration />
+</div>
+<div style="display: @(GetDisplayStyle(2))">
+    <AlarmAdministration />
+</div>
+<div style="display: @(GetDisplayStyle(3))">
+    <IslandAdministration />
+</div>
+<div style="display: @(GetDisplayStyle(4))">
+    <TurbineAdministration />
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        DisplayStates[1] = true;    
+    }
+
+    private Dictionary<int, bool> DisplayStates = new Dictionary<int, bool>();
+
+    private void ToggleDisplay(int link)
+    {
+        if (DisplayStates.ContainsKey(link))
+        {
+            foreach (var item in DisplayStates)
+            {
+                DisplayStates[item.Key] = false;
+            }
+            DisplayStates[link] = !DisplayStates[link];
+        }
+        else
+        {
+            foreach (var item in DisplayStates)
+            {
+                DisplayStates[item.Key] = false;
+            }
+            DisplayStates[link] = true;
+        }
+    }
+
+    private string GetDisplayStyle(int link)
+    {
+        return DisplayStates.ContainsKey(link) && DisplayStates[link] ? "block" : "none";
+    }
+
+    private string GetActiveStyle(int link)
+    {
+        return DisplayStates.ContainsKey(link) && DisplayStates[link] ? "active" : "";
+    }
+}
