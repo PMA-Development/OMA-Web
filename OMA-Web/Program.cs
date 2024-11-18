@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using OMA_Web.API;
 using OMA_Web.API.DuendoAPI;
+using OMA_Web.CustomAuthorizationHandler;
 using Radzen;
 using Task = System.Threading.Tasks.Task;
 
@@ -41,26 +42,34 @@ namespace OMA_Web
                 
             });
 
-    
+            builder.Services.AddTransient<OMAClientAuthorizationMessageHandler>();
+            builder.Services.AddTransient<DuendoClientAuthorizationmessageHandler>();
 
             builder.Services.AddBlazoredToast();
-            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            builder.Services.AddHttpClient("AuthorizedClient")
+            .AddHttpMessageHandler<OMAClientAuthorizationMessageHandler>();
+
 
             builder.Services.AddScoped(sp =>
             {
-                var client = sp.GetRequiredService<HttpClient>();
-                //var url = builder.Configuration.GetValue<string>("APIURL") ?? throw new ArgumentException();
-                var url = "https://localhost:6001" ?? throw new ArgumentException();
-                return new OMAClient(url, client);
+                var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient("AuthorizedClient");
+                var baseUrl = "https://localhost:6001"; 
+                return new OMAClient(baseUrl, httpClient);
             });
+
+
+            builder.Services.AddHttpClient("AuthorizedDuendoClient")
+            .AddHttpMessageHandler<DuendoClientAuthorizationmessageHandler>();
 
             builder.Services.AddScoped(sp =>
             {
-                var client = sp.GetRequiredService<HttpClient>();
-                //var url = builder.Configuration.GetValue<string>("OidcSettings:Authority") ?? throw new ArgumentException();
-                var url = "https://localhost:5001" ?? throw new ArgumentException();
-                return new DuendoClient(url, client);
+                var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient("AuthorizedDuendoClient");
+                var baseUrl = "https://localhost:5000";
+                return new DuendoClient(baseUrl, httpClient);
             });
+
+
+            
             builder.Services.AddBlazorBootstrap();
             builder.Services.AddRadzenComponents();
 
