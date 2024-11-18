@@ -5,15 +5,24 @@ namespace OMA_Web.CustomAuthorizationHandler
 {
     public class OMAClientAuthorizationMessageHandler : AuthorizationMessageHandler
     {
-        public OMAClientAuthorizationMessageHandler(IAccessTokenProvider provider, NavigationManager navigation)
+        public OMAClientAuthorizationMessageHandler(
+            IAccessTokenProvider provider,
+            NavigationManager navigation,
+            IConfiguration configuration)
             : base(provider, navigation)
         {
-        
+            var apiBaseUrl = configuration["OidcSettings:Authority"];
+
+            if (string.IsNullOrEmpty(apiBaseUrl))
+            {
+                throw new ArgumentException("APIURL is not configured in appsettings.json");
+            }
+
             ConfigureHandler(
-                authorizedUrls: new[] { "https://localhost:6001" }, 
+                authorizedUrls: new[] { apiBaseUrl },
                 scopes: new[] { "openid", "profile", "email", "role" }
             );
         }
-    }
 
+    }
 }

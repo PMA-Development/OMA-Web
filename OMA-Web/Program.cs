@@ -43,7 +43,7 @@ namespace OMA_Web
             });
 
             builder.Services.AddTransient<OMAClientAuthorizationMessageHandler>();
-            builder.Services.AddTransient<DuendoClientAuthorizationmessageHandler>();
+            builder.Services.AddTransient<DuendoClientAuthorizationMessageHandler>();
 
             builder.Services.AddBlazoredToast();
             builder.Services.AddHttpClient("AuthorizedClient")
@@ -59,7 +59,7 @@ namespace OMA_Web
 
 
             builder.Services.AddHttpClient("AuthorizedDuendoClient")
-            .AddHttpMessageHandler<DuendoClientAuthorizationmessageHandler>();
+            .AddHttpMessageHandler<DuendoClientAuthorizationMessageHandler>();
 
             builder.Services.AddScoped(sp =>
             {
