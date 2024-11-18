@@ -1,7 +1,10 @@
-using Microsoft.AspNetCore.Authentication;
+using Blazored.Toast;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using OMA_Web.API;
+using OMA_Web.API.DuendoAPI;
 using Radzen;
 using Task = System.Threading.Tasks.Task;
 
@@ -39,12 +42,24 @@ namespace OMA_Web
             });
 
     
+
+            builder.Services.AddBlazoredToast();
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+
             builder.Services.AddScoped(sp =>
             {
                 var client = sp.GetRequiredService<HttpClient>();
-                var url = builder.Configuration.GetValue<string>("APIURL") ?? throw new ArgumentException();
+                //var url = builder.Configuration.GetValue<string>("APIURL") ?? throw new ArgumentException();
+                var url = "https://localhost:6001" ?? throw new ArgumentException();
                 return new OMAClient(url, client);
+            });
+
+            builder.Services.AddScoped(sp =>
+            {
+                var client = sp.GetRequiredService<HttpClient>();
+                //var url = builder.Configuration.GetValue<string>("OidcSettings:Authority") ?? throw new ArgumentException();
+                var url = "https://localhost:5001" ?? throw new ArgumentException();
+                return new DuendoClient(url, client);
             });
             builder.Services.AddBlazorBootstrap();
             builder.Services.AddRadzenComponents();

@@ -14,19 +14,21 @@
                 <RadzenRequiredValidator Text="Title is required" Component="Title" Popup="true" />
             </EditTemplate>
         </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="@nameof(IslandDTO.IslandID)" Title="Island" Width="280px">
+            <EditTemplate Context="turbine">
+                <RadzenDropDown @bind-Value="turbine.IslandID" Data="@islands" TextProperty="@nameof(IslandDTO.Title)" ValueProperty="@nameof(IslandDTO.IslandID)" Style="width:100%; display: block;"
+                                InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select island" }})" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
         <RadzenDataGridColumn Context="turbine" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
             <Template Context="turbine">
                 <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" Click="@(args => EditRow(turbine))" @onclick:stopPropagation="true">
-                </RadzenButton>
-                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="Radzen.ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(args => DeleteRow(turbine))" @onclick:stopPropagation="true">
-                </RadzenButton>
+                    </RadzenButton>
             </Template>
             <EditTemplate Context="turbine">
                 <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" Click="@((args) => SaveRow(turbine))" aria-label="Save">
-                </RadzenButton>
-                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@((args) => CancelEdit(turbine))" aria-label="Cancel">
-                </RadzenButton>
-                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="Radzen.ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(args => DeleteRow(turbine))" aria-label="Delete">
                 </RadzenButton>
             </EditTemplate>
         </RadzenDataGridColumn>
@@ -36,8 +38,8 @@
 @code {
 
     RadzenDataGrid<TurbineDTO> turbineGrid;
-    IEnumerable<TurbineDTO> turbines;
-
+    List<TurbineDTO> turbines;
+    IEnumerable<IslandDTO> islands;
     DataGridEditMode editMode = DataGridEditMode.Single;
 
     List<TurbineDTO> turbinesToInsert = [];
@@ -46,9 +48,9 @@
     protected override async Task OnInitializedAsync()
     {
         // users = await client.GetUsersAsync();
-        var turbineList = new List<TurbineDTO>();
-        turbineList.Add(new TurbineDTO { TurbineID = 1, Title = "A1" });
-        turbines = turbineList;
+        var turbineList = await client.GetTurbinesAsync();
+        islands = await client.GetIslandsAsync();
+        turbines = turbineList.ToList();
     }
 
     void Reset()
@@ -78,9 +80,7 @@
     {
         Reset(turbine);
 
-        // dbContext.Update(log);
-
-        // dbContext.SaveChanges();
+        client.UpdateTurbineAsync(turbine);
     }
 
     async Task SaveRow(TurbineDTO turbine)
@@ -94,31 +94,6 @@
 
         turbineGrid.CancelEditRow(turbine);
 
-        // var orderEntry = dbContext.Entry(log);
-        // if (orderEntry.State == EntityState.Modified)
-        // {
-        //     orderEntry.CurrentValues.SetValues(orderEntry.OriginalValues);
-        //     orderEntry.State = EntityState.Unchanged;
-        // }
-    }
-
-    async Task DeleteRow(TurbineDTO turbine)
-    {
-        Reset(turbine);
-
-        if (turbines.Contains(turbine))
-        {
-            // dbContext.Remove<Log>(log);
-
-            // dbContext.SaveChanges();
-
-            await turbineGrid.Reload();
-        }
-        else
-        {
-            turbineGrid.CancelEditRow(turbine);
-            await turbineGrid.Reload();
-        }
     }
 
     async Task InsertRow()
@@ -133,9 +108,4 @@
         await turbineGrid.InsertRow(turbine);
     }
 
-    public async Task OnCreateRow(TurbineDTO turbine)
-    {
-        // var id = await client.AddUserAsync(island);
-        turbinesToInsert.Remove(turbine);
-    }
 }

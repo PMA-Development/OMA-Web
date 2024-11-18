@@ -2,8 +2,8 @@
 
 <RadzenStack Gap="1rem" >
     <RadzenDataGrid AllowRowSelectOnRowClick="true" Data="@logs" FilterMode="FilterMode.Simple" AllowVirtualization="true" Style="height:90vh"
-                    AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.Or"
-                    AllowSorting="true">
+    AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.Or"
+    AllowSorting="true">
         <Columns>
             <RadzenDataGridColumn Property="@nameof(LogDTO.LogID)" Title="ID" />
             <RadzenDataGridColumn Property="@nameof(LogDTO.Description)" Title="Description" />
@@ -15,18 +15,12 @@
 </RadzenStack>
 
 
-@code {   
+@code {
     IEnumerable<LogDTO> logs;
 
-  
-    protected override void OnInitialized()
-    {
-        List<LogDTO> temp = [];
-        for (int i = 1; i < 100; i++)
-        {
-            temp.Add(new LogDTO { LogID = i, Description = "bla bla bla", Severity = "High", Time = DateTime.Parse("11/11/2024 10:45"), User = new User { UserID = i, FullName = "James james", Email ="James@email.com", Phone = "33 91 02 11" } });
-        }
 
-        logs = temp;
+    protected override async Task OnInitializedAsync()
+    {
+        logs = await client.GetLogsAsync();
     }
 }

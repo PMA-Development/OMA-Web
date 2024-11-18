@@ -1,66 +1,42 @@
 ﻿@page "/tasks"
+@using System.Security.Claims
+
 
 <div class="mb-5">
-    <input placeholder="Search..." class="form-control searchbar" />
+    <input @bind="searchText" placeholder="Search..." class="form-control searchbar" />
 </div>
-
 
 <div class="tasks col-12 flex-column ">
     <div class="col-12 flex-row d-flex justify-content-between">
-        @for (int i = 1; i < 5; i++)
+        @foreach (var item in taskDTOs.Where(x => x.Title.ToLower().Contains(searchText.ToLower())).ToList())
         {
             <div class="card me-5 mb-5">
                 <div class="card-title">
-                    <h5>Replacement of sensor</h5>
+                    <h5>@item.Title</h5>
                 </div>
                 <div class="card-body">
-                    <h5><b>Type:</b> Vedlighedhodelse</h5>
-                    <h5><b>Level:</b> 1</h5>
-                    <h5><b>Description:</b> bla bla bla</h5>
-                    <h5>Nordsø 1 - A1</h5>
+                    <h5><b>Type:</b> @item.Type</h5>
+                    <h5><b>Level:</b> @item.Level.ToString().Replace("_", "")</h5>
+                    <h5><b>Description:</b>@item.Description</h5>
                     <div class="d-flex justify-content-evenly mt-3">
-                        <input type="button" value="Accept" />
-                        <input type="button" value="Eskalate" />
-                   </div>
-                </div>
-            </div>
-        }
-    </div>
-    <div class="col-12 flex-row d-flex justify-content-between">
-        @for (int i = 1; i < 5; i++)
-        {
-            <div class="card me-5 mb-5">
-                <div class="card-title">
-                    <h5>Replacement of sensor</h5>
-                </div>
-                <div class="card-body">
-                    <h5><b>Type:</b> Vedlighedhodelse</h5>
-                    <h5><b>Level:</b> 1</h5>
-                    <h5><b>Description:</b> bla bla bla</h5>
-                    <h5>Nordsø 1 - A1</h5>
-                    <div class="d-flex justify-content-evenly mt-3">
-                        <input type="button" value="Accept" />
-                        <input type="button" value="Eskalate" />
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-    <div class="col-12 flex-row d-flex justify-content-between">
-        @for (int i = 1; i < 5; i++)
-        {
-            <div class="card me-5 mb-5">
-                <div class="card-title">
-                    <h5>Replacement of sensor</h5>
-                </div>
-                <div class="card-body">
-                    <h5><b>Type:</b> Vedlighedhodelse</h5>
-                    <h5><b>Level:</b> 1</h5>
-                    <h5><b>Description:</b> bla bla bla</h5>
-                    <h5>Nordsø 1 - A1</h5>
-                    <div class="d-flex justify-content-evenly mt-3">
-                        <input type="button" value="Accept" />
-                        <input type="button" value="Eskalate" />
+                        @if (item.UserID == Guid.Empty)
+                        {
+                            <input type="button" class="btn btn-primary" value="Accept" @onclick="() => {Accept(item);}" />
+                        }
+                        <input type="button" class="btn btn-primary" value="Escalate" @onclick="() => {ToggleDisplay(item.TaskID);}" />
+                        <select class="btn btn-success dropdown-toggle" @onchange="e => {Escalate(item, e.Value!.ToString()!);}" style="display: @(GetDisplayStyle(item.TaskID))">
+                            @foreach (var level in Enum.GetValues<LevelEnum>())
+                            {
+                                @if (level == item.Level)
+                                {
+                                    <option value="@level" selected>@level.ToString().Replace("_", "")</option>
+                                }
+                                else {
+                                    <option value="@level">@level.ToString().Replace("_", "")</option>
+                                }
+
+                            }
+                        </select>
                     </div>
                 </div>
             </div>
@@ -69,5 +45,60 @@
 </div>
 
 @code {
+    private List<TaskDTO> taskDTOs = [];
 
+    private string searchText = string.Empty;
+
+    protected override async Task OnInitializedAsync() 
+    {
+        var list = await client.GetUncompletedTasksAsync();
+        taskDTOs = list.ToList();
+    }
+
+    public async Task Escalate(TaskDTO item, string level)
+    {
+        Enum.TryParse(level, out LevelEnum levelEnum);
+        item.Level = levelEnum;
+        await client.UpdateTaskAsync(item);
+    }
+
+    public async Task Accept(TaskDTO item) {
+        string claim = string.Empty;
+        try
+        {
+            var authState = await AuthenticationStateProviders.GetAuthenticationStateAsync();
+            var user = authState.User;
+            claim = user.FindFirst(x => x.Type == "sub").Value;
+
+        }
+        catch (Exception e)
+        {
+
+            throw;
+        }
+
+        item.UserID = Guid.Parse(claim);
+        await client.UpdateTaskAsync(item);
+
+        toastService.ShowSuccess($"Task {item.Title} accepted" );
+    }
+
+    private Dictionary<int, bool> DisplayStates = new Dictionary<int, bool>();
+
+    private void ToggleDisplay(int link)
+    {
+        if (DisplayStates.ContainsKey(link))
+        {
+            DisplayStates[link] = !DisplayStates[link];
+        }
+        else
+        {
+            DisplayStates[link] = true;
+        }
+    }
+
+    private string GetDisplayStyle(int link)
+    {
+        return DisplayStates.ContainsKey(link) && DisplayStates[link] ? "block" : "none";
+    }
 }

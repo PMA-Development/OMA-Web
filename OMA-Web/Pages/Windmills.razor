@@ -1,7 +1,9 @@
 ﻿@page "/windmills/{id:int}"
+@inject OMAClient client
+@inject IToastService toastService
 
 <div>
-    <input placeholder="Search..." class="form-control searchbar" />
+    <input @bind="searchText" placeholder="Search..." class="form-control searchbar" />
 </div>
 
 <div class="mb-2">
@@ -9,76 +11,36 @@
 </div>
 
 <div class="windmills col-12 flex-column">
-    <!-- Row A -->
     <div class="col-12 flex-row d-flex">
-        @for (int i = 1; i < 5; i++)
+        @if (turbineDTOs.Count() != 0)
         {
-            <div class="card me-5 mb-5" @onclick="async () => {await ShowWindmill(i);}">
-                <div class="card-title ">
-                    <h2>@("A" + i)</h2>
+            @foreach (var item in turbineDTOs.Where(x => x.Title.ToLower().Contains(searchText.ToLower())).ToList())
+            {
+                <div class="card me-5 mb-5" @onclick="async () => {await ShowWindmill(item);}">
+                    <div class="card-title ">
+                        <h2>@item.Title</h2>
+                    </div>
+                    @if (deviceDTOs.Any(x => x.TurbineID == item.TurbineID && x.State == StateEnum._2))
+                    {
+                        <div class="card-body error">
+                            <h5>Temperature: 24C</h5>
+                            <h5>Fugtoghed: 19%</h5>
+                            <h5>Acceleration: 25mps</h5>
+                            <h5>Vibrationer: 45hz</h5>
+                            <h5>Rotatiuoner: 25rpm</h5>
+                        </div>
+                    }
+                    else {
+                        <div class="card-body success">
+                            <h5>Temperature: 24C</h5>
+                            <h5>Fugtoghed: 19%</h5>
+                            <h5>Acceleration: 25mps</h5>
+                            <h5>Vibrationer: 45hz</h5>
+                            <h5>Rotatiuoner: 25rpm</h5>
+                        </div>
+                    }
                 </div>
-                <div class="card-body success">
-                    <h5>Temperature: 24C</h5>
-                    <h5>Fugtoghed: 19%</h5>
-                    <h5>Acceleration: 25mps</h5>
-                    <h5>Vibrationer: 45hz</h5>
-                    <h5>Rotatiuoner: 25rpm</h5>
-                </div>
-            </div>
-        }
-    </div>
-    <!-- Row B -->
-    <div class="col-12 flex-row d-flex">
-        @for (int i = 1; i < 5; i++)
-        {
-            <div class="card me-5 mb-5" @onclick="async () => {await ShowWindmill(i);}">
-                <div class="card-title ">
-                    <h2>@("B" + i)</h2>
-                </div>
-                <div class="card-body success">
-                    <h5>Temperature: 24C</h5>
-                    <h5>Fugtoghed: 19%</h5>
-                    <h5>Acceleration: 25mps</h5>
-                    <h5>Vibrationer: 45hz</h5>
-                    <h5>Rotatiuoner: 25rpm</h5>
-                </div>
-            </div>
-        }
-    </div>
-    <!-- Row C -->
-    <div class="col-12 flex-row d-flex">
-        @for (int i = 1; i < 5; i++)
-        {
-            <div class="card me-5 mb-5" @onclick="async () => {await ShowWindmill(i);}">
-                <div class="card-title ">
-                    <h2>@("C" + i)</h2>
-                </div>
-                <div class="card-body success">
-                    <h5>Temperature: 24C</h5>
-                    <h5>Fugtoghed: 19%</h5>
-                    <h5>Acceleration: 25mps</h5>
-                    <h5>Vibrationer: 45hz</h5>
-                    <h5>Rotatiuoner: 25rpm</h5>
-                </div>
-            </div>
-        }
-    </div>
-    <!-- Row D -->
-    <div class="col-12 flex-row d-flex">
-        @for (int i = 1; i < 5; i++)
-        {
-            <div class="card me-5" @onclick="async () => {await ShowWindmill(i);}">
-                <div class="card-title ">
-                    <h2>@("D" + i)</h2>
-                </div>
-                <div class="card-body success">
-                    <h5>Temperature: 24C</h5>
-                    <h5>Fugtoghed: 19%</h5>
-                    <h5>Acceleration: 25mps</h5>
-                    <h5>Vibrationer: 45hz</h5>
-                    <h5>Rotatiuoner: 25rpm</h5>
-                </div>
-            </div>
+            }
         }
     </div>
 </div>
@@ -92,11 +54,39 @@
     [Parameter]
     public int ID { get; set; }
 
+    private string searchText = string.Empty;
 
-    private async Task ShowWindmill(int id)
+    public IEnumerable<TurbineDTO> turbineDTOs = [];
+    public IEnumerable<DeviceDTO> deviceDTOs = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            turbineDTOs = await client.GetTurbinesIslandAsync(ID);
+        }
+        catch (Exception)
+        {
+            toastService.ShowInfo("There are no turbines on this island..");
+        }
+
+        try
+        {
+            deviceDTOs = await client.GetDevicesAsync();
+        }
+        catch (Exception)
+        {
+            toastService.ShowInfo("There are no devices..");
+        }
+    }
+
+    public async Task ShowWindmill(TurbineDTO item)
     {
         var parameters = new Dictionary<string, object>();
-        parameters.Add("WindmillID", id);
-        await modal.ShowAsync<WindmillsModal>(title: "Windmill detail", parameters: parameters);
+        parameters.Add("WindmillID", item.TurbineID);
+        parameters.Add("deviceDTOs", deviceDTOs);
+        await modal.ShowAsync<WindmillsModal>(title: $"Windmill {item.Title}", parameters: parameters);
     }
+
+  
 }

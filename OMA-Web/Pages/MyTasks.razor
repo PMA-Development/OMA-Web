@@ -1,66 +1,47 @@
 ﻿@page "/mytasks"
 
 <div class="mb-5">
-    <input placeholder="Search..." class="form-control searchbar" />
+    <input @bind="searchText" placeholder="Search..." class="form-control searchbar" />
 </div>
 
 
 <div class="mytasks col-12 flex-column ">
     <div class="col-12 flex-row d-flex justify-content-between">
-        @for (int i = 1; i < 5; i++)
+        @foreach (var item in taskDTOs.Where(x =>x.Title.ToLower().Contains(searchText.ToLower())).ToList())
         {
-            <div class="card me-5 mb-5" @onclick="async () => {await ShowTasks(i);}">
+            <div class="card me-5 mb-5">
                 <div class="card-title">
-                    <h5>Replacement of sensor</h5>
+                    <h5>@item.Title</h5>
                 </div>
                 <div class="card-body">
-                    <h5><b>Type:</b> Vedlighedhodelse</h5>
-                    <h5><b>Level:</b> 1</h5>
-                    <h5><b>Description:</b> bla bla bla</h5>
-                    <h5>Nordsø 1 - A1</h5>
+                    <h5><b>Type:</b> @item.Type</h5>
+                    <h5><b>Level:</b> @item.Level.ToString().Replace("_", "")</h5>
+                    <h5><b>Description:</b> @item.Description</h5>
                     <div class="d-flex justify-content-evenly mt-3">
-                        <input type="button" value="View" />
-                        <input type="button" value="Eskalate" />
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-    <div class="col-12 flex-row d-flex justify-content-between">
-        @for (int i = 1; i < 5; i++)
-        {
-            <div class="card me-5 mb-5" @onclick="async () => {await ShowTasks(i);}">
-                <div class="card-title">
-                    <h5>Replacement of sensor</h5>
-                </div>
-                <div class="card-body">
-                    <h5><b>Type:</b> Vedlighedhodelse</h5>
-                    <h5><b>Level:</b> 1</h5>
-                    <h5><b>Description:</b> bla bla bla</h5>
-                    <h5>Nordsø 1 - A1</h5>
-                    <div class="d-flex justify-content-evenly mt-3">
-                        <input type="button" value="View" />
-                        <input type="button" value="Eskalate" />
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-    <div class="col-12 flex-row d-flex justify-content-between">
-        @for (int i = 1; i < 5; i++)
-        {
-            <div class="card me-5 mb-5" @onclick="async () => {await ShowTasks(i);}">
-                <div class="card-title">
-                    <h5>Replacement of sensor</h5>
-                </div>
-                <div class="card-body">
-                    <h5><b>Type:</b> Vedlighedhodelse</h5>
-                    <h5><b>Level:</b> 1</h5>
-                    <h5><b>Description:</b> bla bla bla</h5>
-                    <h5>Nordsø 1 - A1</h5>
-                    <div class="d-flex justify-content-evenly mt-3">
-                        <input type="button" value="View" />
-                        <input type="button" value="Eskalate" />
+                        <input type="button" class="btn btn-primary" value="View" @onclick="async () => {await ShowTasks(item);}" />
+                        <input type="button" class="btn btn-primary" value="Escalate" @onclick="() => {ToggleDisplay(item.TaskID);}" />
+                        @if (droneDTOs.Any(x => x.TaskID == item.TaskID))
+                        {
+                            <input type="button" class="btn btn-primary" value="Return Drone" @onclick="async e => {await ReturnDrone(item.TaskID);}" />
+                        }
+                        else {
+                            <input type="button" class="btn btn-primary" value="Send Drone" @onclick="async e => {await SendOutDrone(item.TaskID);}" />
+                        }
+
+                        <select class="btn btn-success dropdown-toggle" @onchange="async e => {await Escalate(item, e.Value!.ToString()!);}" style="display: @(GetDisplayStyle(item.TaskID))">
+                            @foreach (var level in Enum.GetValues<LevelEnum>())
+                            {
+                                @if (level == item.Level)
+                                {
+                                    <option value="@level" selected>@level.ToString().Replace("_", "")</option>
+                                }
+                                else
+                                {
+                                    <option value="@level">@level.ToString().Replace("_", "")</option>
+                                }
+
+                            }
+                        </select>
                     </div>
                 </div>
             </div>
@@ -68,16 +49,140 @@
     </div>
 </div>
 
-<Modal @ref="modal" />
+<Modal @ref="modal" title="Modal title">
+    <BodyTemplate>
+        <div class="myTaskModel text-center">
+            <label>Finishing statemetns: </label>
+            <div>
+                <InputTextArea @bind-Value="description" style="max-height:30rem" rows="4"></InputTextArea>
+            </div>
+        </div>
+    </BodyTemplate>
+    <FooterTemplate>
+        <div class="d-flex flex-row me-3 mt-3">
+            <input value="Finish" type="button" class="btn btn-primary me-3" @onclick="Finish" />
+            <input value="Save" type="button" class="btn btn-primary" @onclick="Save" />
+        </div>
+    </FooterTemplate>
+</Modal>
 
 @code {
     private BlazorBootstrap.Modal modal = default!;
 
+    private IEnumerable<TaskDTO> taskDTOs = [];
 
-    private async Task ShowTasks(int id)
+    private IEnumerable<DroneDTO> droneDTOs = [];
+
+    private string searchText = string.Empty;
+
+    private string description = string.Empty;
+
+    private TaskDTO item;
+
+    protected override async Task OnInitializedAsync()
     {
-        var parameters = new Dictionary<string, object>();
-        parameters.Add("TaskID", id);
-        await modal.ShowAsync<MyTaskModal>(title: "Task detail", parameters: parameters);
+        string claim = string.Empty;
+        try
+        {
+            var authState = await AuthenticationStateProviders.GetAuthenticationStateAsync();
+            var user = authState.User;
+            claim = user.FindFirst(x => x.Type == "sub")!.Value;
+
+        }
+        catch (Exception e)
+        {
+            throw;
+        }
+
+        try
+        {
+            taskDTOs = await client.GetUserTasksAsync(Guid.Parse(claim));
+        }
+        catch (Exception)
+        {
+            toastService.ShowInfo("There are no tasks..");
+        }
+
+        try
+        {
+            droneDTOs = await client.GetDronesAsync();
+        }
+        catch (Exception e)
+        {
+            toastService.ShowInfo("There are no available drones..");
+        }
+    }
+
+    public async Task SendOutDrone(int id) 
+    {
+       try
+       {
+            var drone = droneDTOs.Where(x => x.Available == true && x.TaskID == 0).FirstOrDefault();
+            drone!.TaskID = id;
+            drone.Available = false;
+            await client.UpdateDroneAsync(drone);
+       }
+       catch (Exception)
+       {
+            toastService.ShowInfo("There are no available drones..");
+       }
+    }
+
+    public async Task ReturnDrone(int id)
+    {
+        var drone = droneDTOs.Where(x => x.Available == false && x.TaskID == id).FirstOrDefault();
+        drone!.TaskID = 0;
+        drone.Available = true;
+        await client.UpdateDroneAsync(drone);
+    }
+
+    public async Task Escalate(TaskDTO item, string level)
+    {
+        Enum.TryParse(level, out LevelEnum levelEnum);
+        item.Level = levelEnum;
+        await client.UpdateTaskAsync(item);
+    }
+
+    private Dictionary<int, bool> DisplayStates = new Dictionary<int, bool>();
+
+    private void ToggleDisplay(int link)
+    {
+        if (DisplayStates.ContainsKey(link))
+        {
+            DisplayStates[link] = !DisplayStates[link];
+        }
+        else
+        {
+            DisplayStates[link] = true;
+        }
+    }
+
+    private string GetDisplayStyle(int link)
+    {
+        return DisplayStates.ContainsKey(link) && DisplayStates[link] ? "block" : "none";
+    }
+
+    private async Task ShowTasks(TaskDTO item)
+    {
+        this.item = item;
+        description = item.FinishDescription;
+        await modal.ShowAsync();
+    }
+
+    public async Task Save()
+    {
+        item.FinishDescription = description;
+        await client.UpdateTaskAsync(item);
+        toastService.ShowSuccess("Successfully saved..");
+        await modal.HideAsync();
+    }
+
+    public async Task Finish()
+    {
+        item.IsCompleted = true;
+        item.FinishDescription = description;
+        await client.UpdateTaskAsync(item);
+        toastService.ShowSuccess("Successfully finished..");
+        await modal.HideAsync();
     }
 }

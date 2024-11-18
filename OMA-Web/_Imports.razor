@@ -1,4 +1,6 @@
-﻿@using System.Net.Http
+﻿@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Hotline-User, Admin")]
+
+@using System.Net.Http
 @using System.Net.Http.Json
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
@@ -14,5 +16,13 @@
 @using Radzen
 @using Radzen.Blazor
 @using OMA_Web.API;
+@using OMA_Web.API.DuendoAPI;
 @using OMA_Web.Pages.Admin.Components;
+@using Blazored.Toast
+@using Blazored.Toast.Services
+@using Microsoft.AspNet.Identity;
+
+@inject IToastService toastService;
+@inject OMAClient client
+@inject AuthenticationStateProvider AuthenticationStateProviders
 @using Task = System.Threading.Tasks.Task;

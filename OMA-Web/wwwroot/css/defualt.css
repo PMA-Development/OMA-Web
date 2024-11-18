@@ -12,8 +12,8 @@ a, .btn-link {
 
 .btn-primary {
     color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: green !important;
+    border-color: green !important;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
@@ -184,9 +184,25 @@ code {
 
 
 /* Home Page */
-
-
+.home .flex-row {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 20px !important;
+}
 /* Windmills */
+.windmills .flex-row {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 20px !important;
+}
+
+.windmillmodal .box {
+    border: solid #000000 2px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+}
+
 .return-btn {
     border: none;
     background: white;
@@ -199,15 +215,31 @@ code {
 
 /* Tasks */
 
+
 .tasks .card {
     cursor: unset !important;
 }
 
+.tasks .flex-row {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 20px !important;
+}
+
+/* My Tasks */
+.mytasks .flex-row {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 20px !important;
+}
+
+.mytasks .card {
+    cursor: unset !important;
+}
 
 /* Admin page */
-
 .adminPage .nav-link {
-    color:gray!important;
+    color: gray !important;
 }
 .adminPage .nav-link.active {
     color:black!important;

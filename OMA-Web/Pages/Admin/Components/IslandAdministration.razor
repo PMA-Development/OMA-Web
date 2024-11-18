@@ -24,16 +24,11 @@
             <Template Context="island">
                 <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" Click="@(args => EditRow(island))" @onclick:stopPropagation="true">
                 </RadzenButton>
-                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="Radzen.ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(args => DeleteRow(island))" @onclick:stopPropagation="true">
-                </RadzenButton>
+                
             </Template>
             <EditTemplate Context="island">
                 <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" Click="@((args) => SaveRow(island))" aria-label="Save">
-                </RadzenButton>
-                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@((args) => CancelEdit(island))" aria-label="Cancel">
-                </RadzenButton>
-                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="Radzen.ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(args => DeleteRow(island))" aria-label="Delete">
-                </RadzenButton>
+                </RadzenButton>                
             </EditTemplate>
         </RadzenDataGridColumn>
     </Columns>
@@ -42,7 +37,7 @@
 @code {
 
     RadzenDataGrid<IslandDTO> islandGrid;
-    IEnumerable<IslandDTO> islands;
+    List<IslandDTO> islands;
 
     DataGridEditMode editMode = DataGridEditMode.Single;
 
@@ -51,25 +46,23 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // users = await client.GetUsersAsync();
-        var islandlist = new List<IslandDTO>();
-        islandlist.Add(new IslandDTO {IslandID = 1, Title = "Nordsø - 1", Abbreviation = "NS-1"});
-        islands = islandlist;
+        var listIsland = await client.GetIslandsAsync();
+        islands = listIsland.ToList();
     }
 
-    void Reset()
+    public void Reset()
     {
         islandsToInsert.Clear();
         islandsToUpdate.Clear();
     }
 
-    void Reset(IslandDTO island)
+    public void Reset(IslandDTO island)
     {
         islandsToInsert.Remove(island);
         islandsToUpdate.Remove(island);
     }
 
-    async Task EditRow(IslandDTO island)
+    public async Task EditRow(IslandDTO island)
     {
         if (editMode == DataGridEditMode.Single && islandsToInsert.Count() > 0)
         {
@@ -80,54 +73,26 @@
         await islandGrid.EditRow(island);
     }
 
-    void OnUpdateRow(IslandDTO island)
+    public async Task OnUpdateRow(IslandDTO island)
     {
         Reset(island);
 
-        // dbContext.Update(log);
-
-        // dbContext.SaveChanges();
+        await client.UpdateIslandAsync(island);
     }
 
-    async Task SaveRow(IslandDTO island)
+    public async Task SaveRow(IslandDTO island)
     {
         await islandGrid.UpdateRow(island);
     }
 
-    void CancelEdit(IslandDTO island)
+    public void CancelEdit(IslandDTO island)
     {
         Reset(island);
 
         islandGrid.CancelEditRow(island);
-
-        // var orderEntry = dbContext.Entry(log);
-        // if (orderEntry.State == EntityState.Modified)
-        // {
-        //     orderEntry.CurrentValues.SetValues(orderEntry.OriginalValues);
-        //     orderEntry.State = EntityState.Unchanged;
-        // }
     }
 
-    async Task DeleteRow(IslandDTO island)
-    {
-        Reset(island);
-
-        if (islands.Contains(island))
-        {
-            // dbContext.Remove<Log>(log);
-
-            // dbContext.SaveChanges();
-
-            await islandGrid.Reload();
-        }
-        else
-        {
-            islandGrid.CancelEditRow(island);
-            await islandGrid.Reload();
-        }
-    }
-
-    async Task InsertRow()
+    public async Task InsertRow()
     {
         if (editMode == DataGridEditMode.Single)
         {
@@ -137,11 +102,5 @@
         var island = new IslandDTO();
         islandsToInsert.Add(island);
         await islandGrid.InsertRow(island);
-    }
-
-    public async Task OnCreateRow(IslandDTO island)
-    {
-        // var id = await client.AddUserAsync(island);
-        islandsToInsert.Remove(island);
     }
 }

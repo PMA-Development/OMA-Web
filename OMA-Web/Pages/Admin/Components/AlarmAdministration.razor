@@ -61,6 +61,13 @@
             </EditTemplate>
         </RadzenDataGridColumn>
 
+        <RadzenDataGridColumn Property="@nameof(AlarmConfigDTO.IslandID)" Title="Island" Width="280px">
+            <EditTemplate Context="alarm">
+                <RadzenDropDown @bind-Value="alarm.IslandID" Data="@islands" TextProperty="@nameof(IslandDTO.Title)" ValueProperty="@nameof(IslandDTO.IslandID)" Style="width:100%; display: block;"
+                                InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select island" }})" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
         <RadzenDataGridColumn Context="alarm" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
             <Template Context="alarm">
                 <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" Click="@(args => EditRow(alarm))" @onclick:stopPropagation="true">
@@ -84,7 +91,8 @@
 @code {
 
     RadzenDataGrid<AlarmConfigDTO> alarmGrid;
-    IEnumerable<AlarmConfigDTO> alarms;
+    List<AlarmConfigDTO> alarms;
+    IEnumerable<IslandDTO> islands;
 
     DataGridEditMode editMode = DataGridEditMode.Single;
 
@@ -93,25 +101,24 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // users = await client.GetUsersAsync();
-        var alarmlist = new List<AlarmConfigDTO>();
-        alarmlist.Add(new AlarmConfigDTO { AlarmConfigID = 1, MaxTemperature = 35, MinTemperature = 10, MaxAirPressure = 30, MinAirPressure = 20, MaxHumidity = 99, MinHumidity = 20, Island = new Island { IslandID = 1, Title = "Nordsø 1", Abbreviation = "NS-1", Turbine = new Turbine { TurbineID = 1, Title = "Turbine 1" } } });
-        alarms = alarmlist;
+        var listAlarm = await client.GetAlarmConfigsAsync();
+        islands = await client.GetIslandsAsync();
+        alarms = listAlarm.ToList();
     }
 
-    void Reset()
+    public void Reset()
     {
         alarmsToInsert.Clear();
         alarmsToUpdate.Clear();
     }
 
-    void Reset(AlarmConfigDTO alarm)
+    public void Reset(AlarmConfigDTO alarm)
     {
         alarmsToInsert.Remove(alarm);
         alarmsToUpdate.Remove(alarm);
     }
 
-    async Task EditRow(AlarmConfigDTO alarm)
+    public async Task EditRow(AlarmConfigDTO alarm)
     {
         if (editMode == DataGridEditMode.Single && alarmsToInsert.Count() > 0)
         {
@@ -122,44 +129,33 @@
         await alarmGrid.EditRow(alarm);
     }
 
-    void OnUpdateRow(AlarmConfigDTO alarm)
+    public async Task OnUpdateRow(AlarmConfigDTO alarm)
     {
         Reset(alarm);
 
-        // dbContext.Update(log);
-
-        // dbContext.SaveChanges();
+        await client.UpdateAlarmConfigAsync(alarm);
     }
 
-    async Task SaveRow(AlarmConfigDTO alarm)
+    public async Task SaveRow(AlarmConfigDTO alarm)
     {
         await alarmGrid.UpdateRow(alarm);
     }
 
-    void CancelEdit(AlarmConfigDTO alarm)
+    public void CancelEdit(AlarmConfigDTO alarm)
     {
         Reset(alarm);
 
         alarmGrid.CancelEditRow(alarm);
-
-        // var orderEntry = dbContext.Entry(log);
-        // if (orderEntry.State == EntityState.Modified)
-        // {
-        //     orderEntry.CurrentValues.SetValues(orderEntry.OriginalValues);
-        //     orderEntry.State = EntityState.Unchanged;
-        // }
     }
 
-    async Task DeleteRow(AlarmConfigDTO alarm)
+    public async Task DeleteRow(AlarmConfigDTO alarm)
     {
         Reset(alarm);
 
         if (alarms.Contains(alarm))
         {
-            // dbContext.Remove<Log>(log);
-
-            // dbContext.SaveChanges();
-
+            await client.DeleteAlarmConfigAsync(alarm.AlarmConfigID);
+            alarms.Remove(alarm);
             await alarmGrid.Reload();
         }
         else
@@ -169,7 +165,7 @@
         }
     }
 
-    async Task InsertRow()
+    public async Task InsertRow()
     {
         if (editMode == DataGridEditMode.Single)
         {
@@ -183,7 +179,9 @@
 
     public async Task OnCreateRow(AlarmConfigDTO alarm)
     {
-        // var id = await client.AddUserAsync(alarm);
+        var id = await client.AddAlarmConfigAsync(alarm);
+        alarm.AlarmConfigID = id;
+        alarms.Add(alarm);
         alarmsToInsert.Remove(alarm);
     }
 }
