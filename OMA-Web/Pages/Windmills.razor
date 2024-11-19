@@ -1,6 +1,7 @@
 ﻿@page "/windmills/{id:int}"
 @inject OMAClient client
 @inject IToastService toastService
+@inject NavigationManager NavigationManager
 
 <div>
     <input @bind="searchText" placeholder="Search..." class="form-control searchbar" />
@@ -23,20 +24,18 @@
                     @if (deviceDTOs.Any(x => x.TurbineID == item.TurbineID && x.State == StateEnum._2))
                     {
                         <div class="card-body error">
-                            <h5>Temperature: 24C</h5>
-                            <h5>Fugtoghed: 19%</h5>
-                            <h5>Acceleration: 25mps</h5>
-                            <h5>Vibrationer: 45hz</h5>
-                            <h5>Rotatiuoner: 25rpm</h5>
+                            @foreach (var task in tasksDTOs.Where(x => x.TurbineID == item.TurbineID))
+                            {
+                                <h5>@task.Title</h5>
+                            }
                         </div>
                     }
                     else {
                         <div class="card-body success">
-                            <h5>Temperature: 24C</h5>
-                            <h5>Fugtoghed: 19%</h5>
-                            <h5>Acceleration: 25mps</h5>
-                            <h5>Vibrationer: 45hz</h5>
-                            <h5>Rotatiuoner: 25rpm</h5>
+                            @foreach (var task in tasksDTOs.Where(x => x.TurbineID == item.TurbineID))
+                            {
+                                <h5>@task.Title</h5>
+                            }
                         </div>
                     }
                 </div>
@@ -46,10 +45,35 @@
 </div>
 
 
-<Modal @ref="modal" />
+<Modal @ref="modal" title="Modal title">
+
+    <BodyTemplate>
+        <div class="windmillmodal"> 
+            <h5>Telemetry</h5>
+            <div class="box">
+                @foreach (var data in turbineData[item.TurbineID])
+                {
+                    <h5>@($"{data.Attributes.FirstOrDefault().Name}: {data.Attributes.FirstOrDefault().Value}")</h5>
+                }
+            </div>
+        </div>
+    </BodyTemplate>
+    <FooterTemplate>
+        <div class="d-flex flex-row">
+            @if (deviceDTOs.Any(x => x.TurbineID == item.TurbineID && x.State == StateEnum._2))
+            {
+                <input value="Turn On" type="button" class="form-control" @onclick="async () => {await TurnOnTurbine();}" />
+            }
+            else
+            {
+                <input value="Shutdown" type="button" class="form-control" @onclick="async () => {await ShutDownTurbine();}" />
+            }
+        </div>
+    </FooterTemplate>
+</Modal>
 
 @code {
-    private BlazorBootstrap.Modal modal = default!;
+    private Modal modal = default!;
 
     [Parameter]
     public int ID { get; set; }
@@ -57,7 +81,11 @@
     private string searchText = string.Empty;
 
     public IEnumerable<TurbineDTO> turbineDTOs = [];
-    public IEnumerable<DeviceDTO> deviceDTOs = [];
+    public IEnumerable<TaskDTO> tasksDTOs = [];
+    public Dictionary<int, List<DeviceData>> turbineData = [];
+    public List<DeviceDTO> deviceDTOs = [];
+
+    private TurbineDTO item = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -72,7 +100,44 @@
 
         try
         {
-            deviceDTOs = await client.GetDevicesAsync();
+            turbineData = await client.GetTurbinesLatestDatasAsync();
+        }
+        catch (Exception)
+        {
+            toastService.ShowInfo("There are no data collected..");
+        }
+
+        try
+        {
+            tasksDTOs = await client.GetUncompletedTasksAsync();
+        }
+        catch (Exception)
+        {
+            toastService.ShowInfo("There are no uncompleted tasks..");
+        }
+        await UpdateDevices();
+    }
+
+    public async Task ShutDownTurbine()
+    {
+        await client.ActionTurbineAsync(item.TurbineID, "ChangeState", 2);
+        toastService.ShowInfo(item.Title + " has been shutdown");
+        await UpdateDevices();
+    }
+
+    public async Task TurnOnTurbine()
+    {
+        await client.ActionTurbineAsync(item.TurbineID, "ChangeState", 1);
+        toastService.ShowInfo(item.Title + " has been turned on");
+        await UpdateDevices();
+    }
+
+    public async Task UpdateDevices() 
+    {
+        try
+        {
+            var deviceList = await client.GetDevicesAsync();
+            deviceDTOs = deviceList.ToList();
         }
         catch (Exception)
         {
@@ -82,11 +147,7 @@
 
     public async Task ShowWindmill(TurbineDTO item)
     {
-        var parameters = new Dictionary<string, object>();
-        parameters.Add("WindmillID", item.TurbineID);
-        parameters.Add("deviceDTOs", deviceDTOs);
-        await modal.ShowAsync<WindmillsModal>(title: $"Windmill {item.Title}", parameters: parameters);
+        this.item = item;
+        await modal.ShowAsync();
     }
-
-  
 }

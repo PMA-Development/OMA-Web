@@ -13,7 +13,7 @@ namespace OMA_Web.CustomAuthorizationHandler
             : base(provider, navigation)
         {
 
-            var apiBaseUrl = configuration["APIURL"];
+            var apiBaseUrl = configuration["OidcSettings:Authority"];
             if (string.IsNullOrEmpty(apiBaseUrl))
             {
                 throw new ArgumentException("APIURL is not configured in appsettings.json");

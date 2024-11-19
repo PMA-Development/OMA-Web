@@ -4,7 +4,6 @@
 @inject NavigationManager Navigation
 @inject IAccessTokenProvider AccessTokenProvider
 @inject AuthenticationStateProvider AuthenticationStateProvider
-
 <PageTitle>Windmills</PageTitle>
 <AuthorizeView >
     <h3>Data Fetching</h3>
@@ -62,9 +61,25 @@
                                                          // Perform actions based on role
         }
 
-        islandDTOs = await client.GetIslandsAsync();
-        tasksDTOs = await client.GetUncompletedTasksAsync();
-        turbineDTOs = await client.GetTurbinesAsync();
+        
+        try
+        {
+            islandDTOs = await client.GetIslandsAsync();
+        }
+        catch (Exception)
+        {
+            toastService.ShowInfo("There are no islands..");
+        }
+
+        try
+        {
+            tasksDTOs = await client.GetUncompletedTasksAsync();
+            turbineDTOs = await client.GetTurbinesAsync();
+        }
+        catch (Exception)
+        {
+
+        }       
     }
 
     private string accessToken;

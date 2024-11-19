@@ -77,8 +77,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var inum = await client.GetUsersAsync();
-        users = inum.ToList();
+        try
+        {
+            var inum = await client.GetUsersAsync();
+            users = inum.ToList();
+        }
+        catch (Exception)
+        {
+            toastService.ShowInfo("There are no users..");
+        }
+        
     }
 
     void Reset()

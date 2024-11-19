@@ -2,7 +2,8 @@
 @using System.Security.Claims
 
 
-<div class="mb-5">
+<div class="mb-5 d-flex">
+    <input class="btn btn-primary" type="button" value="Create Task" />
     <input @bind="searchText" placeholder="Search..." class="form-control searchbar" />
 </div>
 
@@ -44,7 +45,36 @@
     </div>
 </div>
 
+<Modal @ref="modal" title="Modal title">
+
+    <BodyTemplate>
+        <div class="windmillmodal">
+            <label>Title: </label>
+            <input type="text" class="form-control" />
+            <label>Type: </label>
+            <input type="text" class="form-control" />
+            <label>Level: </label>
+            <select>
+                @foreach (var item in Enum.GetValues<LevelEnum>())
+                {
+                    <option value="@item">@item</option>
+                }
+            </select>
+            <InputTextArea style="max-height:30rem" rows="4" />
+        </div>
+    </BodyTemplate>
+    <FooterTemplate>
+        <div class="d-flex flex-row">
+            <input type="button" value="Saves" class="btn btn-primary" />
+        </div>
+    </FooterTemplate>
+</Modal>
+
 @code {
+    private Modal modal = default!;
+
+    private TaskDTO newTask;
+
     private List<TaskDTO> taskDTOs = [];
 
     private string searchText = string.Empty;
@@ -71,7 +101,7 @@
             claim = user.FindFirst(x => x.Type == "sub").Value;
 
         }
-        catch (Exception e)
+        catch (Exception)
         {
 
             throw;

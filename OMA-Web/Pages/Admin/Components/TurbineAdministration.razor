@@ -48,9 +48,23 @@
     protected override async Task OnInitializedAsync()
     {
         // users = await client.GetUsersAsync();
-        var turbineList = await client.GetTurbinesAsync();
-        islands = await client.GetIslandsAsync();
-        turbines = turbineList.ToList();
+        try
+        {
+            var turbineList = await client.GetTurbinesAsync();
+            
+            turbines = turbineList.ToList();
+        }
+        catch (Exception)
+        {
+            toastService.ShowInfo("There are no turbines..");
+        }
+        try
+        {
+            islands = await client.GetIslandsAsync();
+        }
+        catch (Exception)
+        {
+        }
     }
 
     void Reset()

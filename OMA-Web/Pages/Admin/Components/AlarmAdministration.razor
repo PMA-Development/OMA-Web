@@ -101,9 +101,23 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var listAlarm = await client.GetAlarmConfigsAsync();
-        islands = await client.GetIslandsAsync();
-        alarms = listAlarm.ToList();
+        try
+        {
+            var listAlarm = await client.GetAlarmConfigsAsync();
+            alarms = listAlarm.ToList();
+        }
+        catch (Exception)
+        {
+            toastService.ShowInfo("There are no alarms..");
+        }
+
+        try
+        {
+            islands = await client.GetIslandsAsync();
+        }
+        catch (Exception)
+        {
+        }
     }
 
     public void Reset()

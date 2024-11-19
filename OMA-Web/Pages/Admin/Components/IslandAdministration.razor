@@ -46,8 +46,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var listIsland = await client.GetIslandsAsync();
-        islands = listIsland.ToList();
+        try
+        {
+            var listIsland = await client.GetIslandsAsync();
+            islands = listIsland.ToList();
+        }
+        catch (Exception)
+        {
+            toastService.ShowInfo("There are no islands..");
+        }
     }
 
     public void Reset()

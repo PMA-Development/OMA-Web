@@ -11,7 +11,7 @@ namespace OMA_Web.CustomAuthorizationHandler
             IConfiguration configuration)
             : base(provider, navigation)
         {
-            var apiBaseUrl = configuration["OidcSettings:Authority"];
+            var apiBaseUrl = configuration["APIURL"];
 
             if (string.IsNullOrEmpty(apiBaseUrl))
             {

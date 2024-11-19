@@ -64,7 +64,7 @@ namespace OMA_Web
             builder.Services.AddScoped(sp =>
             {
                 var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient("AuthorizedDuendoClient");
-                var baseUrl = "https://localhost:5000";
+                var baseUrl = builder.Configuration.GetSection("OidcSettings:Authority").ToString();
                 return new DuendoClient(baseUrl, httpClient);
             });
 

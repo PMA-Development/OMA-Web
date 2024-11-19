@@ -107,7 +107,7 @@
         {
             droneDTOs = await client.GetDronesAsync();
         }
-        catch (Exception e)
+        catch (Exception)
         {
             toastService.ShowInfo("There are no available drones..");
         }
