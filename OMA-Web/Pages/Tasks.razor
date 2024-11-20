@@ -3,7 +3,7 @@
 
 
 <div class="mb-5 d-flex">
-    <input class="btn btn-primary" type="button" value="Create Task" />
+    <input class="btn btn-primary" type="button" value="Create Task" @onclick="ShowCreateTask" />
     <input @bind="searchText" placeholder="Search..." class="form-control searchbar" />
 </div>
 
@@ -49,40 +49,67 @@
 
     <BodyTemplate>
         <div class="windmillmodal">
-            <label>Title: </label>
-            <input type="text" class="form-control" />
-            <label>Type: </label>
-            <input type="text" class="form-control" />
-            <label>Level: </label>
-            <select>
-                @foreach (var item in Enum.GetValues<LevelEnum>())
-                {
-                    <option value="@item">@item</option>
-                }
-            </select>
-            <InputTextArea style="max-height:30rem" rows="4" />
+            <EditForm Model="newTask" OnValidSubmit="CreateTask">
+                <DataAnnotationsValidator />
+                <label>Title: </label>
+                <InputText @bind-Value="newTask.Title" class="form-control" />
+                <ValidationMessage For=@(() => newTask.Title) />
+                <label>Type: </label>
+                <InputText @bind-Value="newTask.Type" class="form-control" />
+                <ValidationMessage For=@(() => newTask.Type) />
+                <label>Level: </label>
+                <InputSelect class="form-control" @bind-Value="newTask.Level">
+                    @foreach (var item in Enum.GetValues<LevelEnum>())
+                    {
+                        <option value="@item">@item</option>
+                    }
+                </InputSelect>
+                <label>Description: </label>
+                <InputTextArea class="form-control" @bind-Value="newTask.Description" style="max-height:30rem" rows="4" />
+                <ValidationMessage For=@(() => newTask.Description) />
+                <label>Island: </label>
+                <select class="form-control" @onchange="async e => {await IslandChange(e.Value!.ToString()!);}">
+                    @foreach(var item in islandDTOs) {
+                        <option value="@item.IslandID">@item.Title</option>
+                    }
+                </select>
+                <label>Turbine: </label>
+                <select class="form-control" @onchange="e => {TurbineChange(e.Value!.ToString()!);}">
+                    @foreach (var item in turbineDTOs)
+                    {
+                        <option value="@item.TurbineID">@item.Title</option>
+                    }
+                </select>
+                <div class="d-flex flex-row mt-3">
+                    <input type="submit" value="Saves" class="btn btn-primary" />
+                </div>
+            </EditForm>
         </div>
     </BodyTemplate>
-    <FooterTemplate>
-        <div class="d-flex flex-row">
-            <input type="button" value="Saves" class="btn btn-primary" />
-        </div>
-    </FooterTemplate>
 </Modal>
 
 @code {
     private Modal modal = default!;
 
-    private TaskDTO newTask;
+    private TaskDTO newTask = new();
 
     private List<TaskDTO> taskDTOs = [];
+    private IEnumerable<IslandDTO> islandDTOs = [];
+    private IEnumerable<TurbineDTO> turbineDTOs = [];
 
     private string searchText = string.Empty;
 
     protected override async Task OnInitializedAsync() 
     {
-        var list = await client.GetUncompletedTasksAsync();
-        taskDTOs = list.ToList();
+        try
+        {
+            var list = await client.GetUncompletedTasksAsync();
+            taskDTOs = list.ToList();
+        }
+        catch (Exception)
+        {
+            toastService.ShowInfo("There are no tasks..");
+        }
     }
 
     public async Task Escalate(TaskDTO item, string level)
@@ -130,5 +157,71 @@
     private string GetDisplayStyle(int link)
     {
         return DisplayStates.ContainsKey(link) && DisplayStates[link] ? "block" : "none";
+    }
+
+    public async Task IslandChange(string id) 
+    {
+        turbineDTOs = await client.GetTurbinesIslandAsync(int.Parse(id));
+        newTask.TurbineID = turbineDTOs.FirstOrDefault().TurbineID;
+    }
+
+    public async Task ShowCreateTask()
+    {
+        string claim = string.Empty;
+        try
+        {
+            var authState = await AuthenticationStateProviders.GetAuthenticationStateAsync();
+            var user = authState.User;
+            claim = user.FindFirst(x => x.Type == "sub")!.Value;
+
+        }
+        catch (Exception e)
+        {
+            throw;
+        }
+
+        try
+        {
+            islandDTOs = await client.GetIslandsAsync();
+        }
+        catch (Exception)
+        {
+            toastService.ShowInfo("There are no islands..");
+        }
+
+        try
+        {
+            turbineDTOs = await client.GetTurbinesIslandAsync(islandDTOs.FirstOrDefault().IslandID);
+            newTask.TurbineID = turbineDTOs.FirstOrDefault().TurbineID;
+        }
+        catch (Exception)
+        {
+            toastService.ShowInfo("There are no turbines..");
+        }
+
+        newTask.OwnerID = Guid.Parse(claim);
+        newTask.Level = LevelEnum.Hotline1;
+        await modal.ShowAsync();
+    }
+
+    public void TurbineChange(string id) {
+        newTask.TurbineID = int.Parse(id);
+    }
+
+    public async Task CreateTask() 
+    {
+        if (newTask.Level == 0)
+        {
+            toastService.ShowError("Level most be filed out");
+        }
+        else 
+        {
+            taskDTOs.Add(newTask);
+            await client.AddTaskAsync(newTask);
+            toastService.ShowInfo("Successfully added" + newTask.Title + "Task..");
+            newTask = new();
+            await modal.HideAsync();
+        }
+       
     }
 }

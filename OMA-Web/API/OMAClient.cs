@@ -1,5 +1,6 @@
 ﻿namespace OMA_Web.API
 {
+    using System.ComponentModel.DataAnnotations;
     using System.Text;
     using System = global::System;
 
@@ -4239,15 +4240,19 @@
         public int TaskID { get; set; }
 
         [Newtonsoft.Json.JsonProperty("title", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Required]
         public string Title { get; set; }
 
         [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Required]
         public string Type { get; set; }
 
         [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Required]
         public string Description { get; set; }
 
         [Newtonsoft.Json.JsonProperty("level", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Required]
         public LevelEnum Level { get; set; }
 
         [Newtonsoft.Json.JsonProperty("finishDescription", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]

@@ -28,7 +28,7 @@
                     <h5>High Priority</h5>
                     @if (turbineDTOs.Any(x => x.IslandID == island.IslandID))
                     {
-                        foreach (var item in tasksDTOs.Where(x => x.TurbineID == turbineDTOs.Where(x => x.IslandID == island.IslandID).First().TurbineID && x.Level == LevelEnum._3).Take(5))
+                        foreach (var item in tasksDTOs.Where(x => x.TurbineID == turbineDTOs.Where(x => x.IslandID == island.IslandID).First().TurbineID && x.Level == LevelEnum.Hotline3).Take(5))
                         {
                             <p>@item.Title</p>
                         }

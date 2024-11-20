@@ -21,7 +21,7 @@
                     <div class="card-title ">
                         <h2>@item.Title</h2>
                     </div>
-                    @if (deviceDTOs.Any(x => x.TurbineID == item.TurbineID && x.State == StateEnum._2))
+                    @if (deviceDTOs.Any(x => x.TurbineID == item.TurbineID && x.State == StateEnum.Off))
                     {
                         <div class="card-body error">
                             @foreach (var task in tasksDTOs.Where(x => x.TurbineID == item.TurbineID))
@@ -60,7 +60,7 @@
     </BodyTemplate>
     <FooterTemplate>
         <div class="d-flex flex-row">
-            @if (deviceDTOs.Any(x => x.TurbineID == item.TurbineID && x.State == StateEnum._2))
+            @if (deviceDTOs.Any(x => x.TurbineID == item.TurbineID && x.State == StateEnum.Off))
             {
                 <input value="Turn On" type="button" class="form-control" @onclick="async () => {await TurnOnTurbine();}" />
             }
