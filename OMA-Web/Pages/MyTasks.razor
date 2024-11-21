@@ -69,7 +69,7 @@
 @code {
     private BlazorBootstrap.Modal modal = default!;
 
-    private IEnumerable<TaskDTO> taskDTOs = [];
+    private List<TaskDTO> taskDTOs = [];
 
     private IEnumerable<DroneDTO> droneDTOs = [];
 
@@ -96,7 +96,8 @@
 
         try
         {
-            taskDTOs = await client.GetUserTasksAsync(Guid.Parse(claim));
+            var list = await client.GetUserTasksAsync(Guid.Parse(claim));
+            taskDTOs = list.ToList();
         }
         catch (Exception)
         {
@@ -115,17 +116,17 @@
 
     public async Task SendOutDrone(int id) 
     {
-       try
-       {
+        try
+        {
             var drone = droneDTOs.Where(x => x.Available == true && x.TaskID == 0).FirstOrDefault();
             drone!.TaskID = id;
             drone.Available = false;
             await client.UpdateDroneAsync(drone);
-       }
-       catch (Exception)
-       {
+        }
+        catch (Exception)
+        {
             toastService.ShowInfo("There are no available drones..");
-       }
+        }
     }
 
     public async Task ReturnDrone(int id)
@@ -182,6 +183,7 @@
         item.IsCompleted = true;
         item.FinishDescription = description;
         await client.UpdateTaskAsync(item);
+        taskDTOs.Remove(item);
         toastService.ShowSuccess("Successfully finished..");
         await modal.HideAsync();
     }

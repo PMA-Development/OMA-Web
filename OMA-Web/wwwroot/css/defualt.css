@@ -65,6 +65,10 @@ a, .btn-link {
         content: "An error has occurred."
     }
 
+
+/*.collapse:not(.show) {
+    display:none !important;
+}*/
 .loading-progress {
     position: relative;
     display: block;
@@ -122,6 +126,7 @@ code {
 }
 
     .nav-scrollable .flex-column {
+        width: 15.6rem !important;
         display: flex !important;
         list-style: none !important;
         padding: 0 !important;
