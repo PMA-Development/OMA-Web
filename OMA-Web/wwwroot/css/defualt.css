@@ -197,10 +197,11 @@ code {
 }
 
 .windmillmodal .box {
-    border: solid #000000 2px;
+    border: solid #00000024 2px;
     padding: 1rem;
     margin-bottom: 1rem;
-    border-radius: 10px;
+    border-radius: 5px;
+    box-shadow: inset 0px 0px 4px 0px #0000001a;
 }
 
 .return-btn {

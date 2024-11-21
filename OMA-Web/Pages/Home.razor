@@ -5,13 +5,13 @@
 @inject IAccessTokenProvider AccessTokenProvider
 @inject AuthenticationStateProvider AuthenticationStateProvider
 <PageTitle>Windmills</PageTitle>
-<AuthorizeView >
+@* <AuthorizeView >
     <h3>Data Fetching</h3>
 
     <button @onclick="GetAccessToken">Get Access Token</button>
 
     <p>@accessToken</p>
-</AuthorizeView>
+</AuthorizeView> *@
 <div>
     <input placeholder="Search..." @bind="searchText" class="form-control searchbar" />
 </div>
@@ -82,21 +82,21 @@
         }       
     }
 
-    private string accessToken;
+    // private string accessToken;
 
-    private async Task GetAccessToken()
-    {
-        var result = await AccessTokenProvider.RequestAccessToken();
+    // private async Task GetAccessToken()
+    // {
+    //     var result = await AccessTokenProvider.RequestAccessToken();
 
-        if (result.TryGetToken(out var token))
-        {
-            accessToken = token.Value; // This is the access token
-        }
-        else
-        {
-            accessToken = "No access token available.";
-        }
-    }
+    //     if (result.TryGetToken(out var token))
+    //     {
+    //         accessToken = token.Value; // This is the access token
+    //     }
+    //     else
+    //     {
+    //         accessToken = "No access token available.";
+    //     }
+    // }
 
     #endregion
 

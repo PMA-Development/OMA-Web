@@ -1,8 +1,11 @@
 ﻿@page "/windmills/{id:int}"
+@using System.Globalization
+
+@implements IDisposable
 @inject OMAClient client
 @inject IToastService toastService
 @inject NavigationManager NavigationManager
-
+@inject DeviceDataWatchdog Watchdog
 <div>
     <input @bind="searchText" placeholder="Search..." class="form-control searchbar" />
 </div>
@@ -45,16 +48,54 @@
 </div>
 
 
-<Modal @ref="modal" title="Modal title">
+<Modal @ref="modal" Title="Live Data" Size="ModalSize.Large" OnHidden="OnModalHidden">
 
     <BodyTemplate>
-        <div class="windmillmodal"> 
-            <h5>Telemetry</h5>
+        <div class="windmillmodal">
             <div class="box">
                 @foreach (var data in turbineData[item.TurbineID])
                 {
                     <h5>@($"{data.Attributes.FirstOrDefault().Name}: {data.Attributes.FirstOrDefault().Value}")</h5>
                 }
+            </div>
+            <div class="box"> 
+                <div class="control-section" align='center'>
+                    <RadzenLabel Text="Start Date" Component="RadzenDatePickerChangeEvent" />
+                    <RadzenDatePicker ValueChanged="async e => {await StartDateChanged(e.Value);}" TValue="DateTime?" Value=@startDateTime Change="@(args => startDateTime = args)" Name="RadzenDatePickerChangeEvent" />
+                    <RadzenLabel Text="End date" Component="RadzenDatePickerChangeEvent" />
+                    <RadzenDatePicker ValueChanged="async e => {await EndDateChanged(e.Value);}" TValue="DateTime?" Value=@endDateTime Change="@(args => endDateTime = args)" Name="RadzenDatePickerChangeEvent" />
+
+                    <RadzenCard class="pb-0 ps-5" Style="display: flex; align-items: center; gap: 0.5rem;width:fit-content;box-shadow:none;">
+                        <RadzenCheckBox @bind-Value="@smoothDevice" Name="smooth"></RadzenCheckBox>
+                        <RadzenLabel Text="Smooth" For="smooth" Style="margin-right: 1rem;" />
+                        <RadzenCheckBox @bind-Value="@showDataLabelsDevice" Name="dataLabels"></RadzenCheckBox>
+                        <RadzenLabel Text="Show Data Labels" For="dataLabels" />
+                    </RadzenCard>
+                    <RadzenChart>
+                        <RadzenLineSeries Smooth="@smoothDevice" Data="@TemperatureData" CategoryProperty="Timestamp" Title="Temperature" LineType="LineType.Solid" ValueProperty="Value">
+                            <RadzenMarkers MarkerType="MarkerType.Square" />
+                            <RadzenSeriesDataLabels Visible="@showDataLabelsDevice" />
+                        </RadzenLineSeries>
+                        <RadzenLineSeries Smooth="@smoothDevice" Data="@HumidityData" CategoryProperty="Timestamp" Title="Humidity" LineType="LineType.Solid" ValueProperty="Value">
+                            <RadzenMarkers MarkerType="MarkerType.Circle" />
+                            <RadzenSeriesDataLabels Visible="@showDataLabelsDevice" />
+                        </RadzenLineSeries>
+                        <RadzenLineSeries Smooth="@smoothDevice" Data="@AmpData" CategoryProperty="Timestamp" Title="Amp" LineType="LineType.Solid" ValueProperty="Value">
+                            <RadzenMarkers MarkerType="MarkerType.Diamond" />
+                            <RadzenSeriesDataLabels Visible="@showDataLabelsDevice" />
+                        </RadzenLineSeries>
+                        <RadzenLineSeries Smooth="@smoothDevice" Data="@VoltageData" CategoryProperty="Timestamp" Title="Voltage" LineType="LineType.Solid" ValueProperty="Value">
+                            <RadzenMarkers MarkerType="MarkerType.Triangle" />
+                            <RadzenSeriesDataLabels Visible="@showDataLabelsDevice" />
+                        </RadzenLineSeries>
+                        <RadzenCategoryAxis Padding="20" />
+                        <RadzenValueAxis>
+                            <RadzenGridLines Visible="true" />
+                            <RadzenAxisTitle Text="Device Data" />
+                        </RadzenValueAxis>
+                    </RadzenChart>
+
+                </div>
             </div>
         </div>
     </BodyTemplate>
@@ -80,12 +121,31 @@
 
     private string searchText = string.Empty;
 
-    public IEnumerable<TurbineDTO> turbineDTOs = [];
-    public IEnumerable<TaskDTO> tasksDTOs = [];
-    public Dictionary<int, List<DeviceData>> turbineData = [];
-    public List<DeviceDTO> deviceDTOs = [];
+    private IEnumerable<TurbineDTO> turbineDTOs = [];
+    private IEnumerable<TaskDTO> tasksDTOs = [];
+    private Dictionary<int, List<DeviceData>> turbineData = [];
+    private List<DeviceDTO> deviceDTOs = [];
+
+    private IEnumerable<DeviceDataGraphDTO> deviceDataGraphDTOs = [];
+
+    private List<DeviceDataGraphDTO> TemperatureData = [];
+    private List<DeviceDataGraphDTO> HumidityData = [];
+    private List<DeviceDataGraphDTO> VoltageData = [];
+    private List<DeviceDataGraphDTO> AmpData = [];
+
+    private DateTime? startDateTime = DateTime.Now.AddDays(-1);
+    private DateTime? endDateTime = DateTime.Now;
+
+    bool smoothDevice = false;
+    bool showDataLabelsDevice = false;
 
     private TurbineDTO item = new();
+
+    private void OnDeviceDataChanged(object? obj, DeviceDataStatusChanged changed) 
+    {
+        turbineData = changed.DeviceData;
+        StateHasChanged();
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -147,7 +207,113 @@
 
     public async Task ShowWindmill(TurbineDTO item)
     {
+        Watchdog.DeviceDataStatusChanged += OnDeviceDataChanged;
+        _ = Watchdog.StartWatchdog();
+        StateHasChanged();
+
+        try
+        {
+            deviceDataGraphDTOs = await client.GetDeviceDataGraphByTurbineIdAsync(item.TurbineID, DateTime.Now.AddDays(-1), DateTime.Now);
+        }
+        catch (Exception)
+        {
+            toastService.ShowInfo("There are no device data..");
+        }
+        OriantData(deviceDataGraphDTOs);
+
         this.item = item;
         await modal.ShowAsync();
+    }
+
+    public void OriantData(IEnumerable<DeviceDataGraphDTO> list)
+    {
+        foreach (var deviceData in list)
+        {
+            switch (deviceData.Name)
+            {
+                case "Temperature":
+                    TemperatureData.Add(deviceData);
+                    break;
+                case "Humidity":
+                    HumidityData.Add(deviceData);
+                    break;
+                case "Voltage":
+                    VoltageData.Add(deviceData);
+                    break;
+                case "AMP":
+                    AmpData.Add(deviceData);
+                    break;
+                default:
+                    break;
+            }
+        }
+        TemperatureData = SetListDistinc(TemperatureData);
+        HumidityData = SetListDistinc(HumidityData);
+        VoltageData = SetListDistinc(VoltageData);
+        AmpData = SetListDistinc(AmpData);
+    }
+
+    public async Task StartDateChanged(DateTime dateTime) {
+        if (dateTime < endDateTime)
+        {
+            startDateTime = dateTime;
+            await DatePickerChange(dateTime);
+        }
+    }
+
+    public async Task EndDateChanged(DateTime dateTime)
+    {
+        if (dateTime > startDateTime && dateTime <= DateTime.Now)
+        {
+            endDateTime = dateTime;
+            await DatePickerChange(dateTime);
+        }   
+    }
+
+    public async Task DatePickerChange(DateTime datetime)
+    {
+        try
+        {
+            deviceDataGraphDTOs = await client.GetDeviceDataGraphByTurbineIdAsync(item.TurbineID, startDateTime, endDateTime);
+        }
+        catch (Exception)
+        {
+            toastService.ShowInfo("There is no graph data..");
+        }
+        OriantData(deviceDataGraphDTOs);
+    }
+
+    public List<DeviceDataGraphDTO> SetListDistinc(List<DeviceDataGraphDTO> myList) {
+        var tempList = new List<DeviceDataGraphDTO>();
+        double previous = 0;
+        DateTime previousTime = new DateTime();
+        foreach (var temp in myList)
+        {
+            if (previousTime.AddMinutes(10) < temp.Timestamp)
+            {
+                if (previous != temp.Value)
+                {
+                    tempList.Add(temp);
+                }
+            }
+            previousTime = temp.Timestamp;
+            previous = temp.Value;
+        }
+        return tempList;
+
+        
+
+        
+        
+    }
+
+    public async Task OnModalHidden()
+    {
+        Watchdog.Dispose();
+        await modal.HideAsync();
+    }
+
+    void IDisposable.Dispose() {
+        Watchdog.Dispose();
     }
 }

@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OMA_Web.API;
 using OMA_Web.API.DuendoAPI;
 using OMA_Web.CustomAuthorizationHandler;
+using OMA_Web.watchdog;
 using Radzen;
 using Task = System.Threading.Tasks.Task;
 
@@ -41,7 +42,6 @@ namespace OMA_Web
                 options.UserOptions.RoleClaim = "role";
                 
             });
-
             builder.Services.AddTransient<OMAClientAuthorizationMessageHandler>();
             builder.Services.AddTransient<DuendoClientAuthorizationMessageHandler>();
 
@@ -73,8 +73,7 @@ namespace OMA_Web
             builder.Services.AddBlazorBootstrap();
             builder.Services.AddRadzenComponents();
 
-
-
+            builder.Services.AddScoped<DeviceDataWatchdog>();
             await builder.Build().RunAsync();
         }
     }
