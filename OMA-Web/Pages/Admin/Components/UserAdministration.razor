@@ -4,10 +4,10 @@
 @using UserDTO = OMA_Web.API.UserDTO
 
 <RadzenDataGrid @ref="userGrid" AllowAlternatingRows="false" EditMode="@editMode"
-                Data="@users" TItem="UserDTO" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px"
-                FilterMode="FilterMode.Simple" AllowVirtualization="true" Style="height:90vh"
-                AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.Or"
-                AllowSorting="true">
+Data="@users" TItem="UserDTO" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="200px"
+FilterMode="FilterMode.Simple" AllowVirtualization="true" Style="height:90vh"
+AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.Or"
+AllowSorting="true">
 
     <HeaderTemplate>
         <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Text="Add New User" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && usersToInsert.Count() > 0)" />
@@ -86,7 +86,7 @@
         {
             toastService.ShowInfo("There are no users..");
         }
-        
+
     }
 
     void Reset()
@@ -103,6 +103,7 @@
 
     async Task EditRow(UserDTO user)
     {
+        isCreating = true;
         if (editMode == DataGridEditMode.Single && usersToInsert.Count() > 0)
         {
             Reset();
@@ -125,6 +126,7 @@
             };
         await duendoClient.UpdateUserAsync(dto);
         await client.UpdateUserAsync(user);
+        isCreating = false;
     }
 
     async Task SaveRow(UserDTO user)
