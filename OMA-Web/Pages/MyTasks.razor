@@ -118,10 +118,11 @@
     {
         try
         {
-            var drone = droneDTOs.Where(x => x.Available == true && x.TaskID == 0).FirstOrDefault();
+            var drone = droneDTOs.Where(x => x.Available == true && x.TaskID == null).FirstOrDefault();
             drone!.TaskID = id;
             drone.Available = false;
             await client.UpdateDroneAsync(drone);
+            toastService.ShowInfo("Drone send out..");
         }
         catch (Exception)
         {
@@ -135,6 +136,7 @@
         drone!.TaskID = 0;
         drone.Available = true;
         await client.UpdateDroneAsync(drone);
+        toastService.ShowInfo("Drone has returned..");
     }
 
     public async Task Escalate(TaskDTO item, string level)
